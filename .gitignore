@@ -1,9 +1,21 @@
-# Angular build and cache files
+# Node modules
 node_modules/
-.angular/
+
+# Build outputs
 dist/
 build/
 
+# Angular cache
+.angular/
+
+# Python venv
+backend/venv/
+
+# macOS files
+.DS_Store
+
+# VSCode settings
+.vscode/
 # Supabase
 .branches
 .temp
