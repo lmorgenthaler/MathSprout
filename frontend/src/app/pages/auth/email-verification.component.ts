@@ -109,6 +109,8 @@ export class EmailVerificationComponent implements OnInit {
           
           // Redirect based on the updated role
           if (updatedUser?.user_metadata?.['role'] === 'teacher') {
+            // Create teacher record if it doesn't exist
+            await this.supabaseService.getCurrentTeacher();
             this.router.navigate(['/dashboard']);
           } else {
             this.router.navigate(['/student']);
@@ -119,6 +121,8 @@ export class EmailVerificationComponent implements OnInit {
           console.log('User role already set to:', role);
           
           if (role === 'teacher') {
+            // Create teacher record if it doesn't exist
+            await this.supabaseService.getCurrentTeacher();
             this.router.navigate(['/dashboard']);
           } else {
             this.router.navigate(['/student']);
@@ -171,6 +175,8 @@ export class EmailVerificationComponent implements OnInit {
           
           // Redirect based on the updated role
           if (updatedUser?.user_metadata?.['role'] === 'teacher') {
+            // Create teacher record if it doesn't exist
+            await this.supabaseService.getCurrentTeacher();
             this.router.navigate(['/dashboard']);
           } else {
             this.router.navigate(['/student']);
@@ -181,6 +187,8 @@ export class EmailVerificationComponent implements OnInit {
           console.log('User role already set to:', role);
           
           if (role === 'teacher') {
+            // Create teacher record if it doesn't exist
+            await this.supabaseService.getCurrentTeacher();
             this.router.navigate(['/dashboard']);
           } else {
             this.router.navigate(['/student']);

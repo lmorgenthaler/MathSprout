@@ -146,16 +146,9 @@ export class SignUpComponent implements OnInit {
       }
 
       if (user) {
-        // Skip verification and navigate directly to the appropriate dashboard
-        if (this.userRole === 'teacher') {
-          // For teachers, go directly to the dashboard
-          await this.router.navigate(['/dashboard']);
-        } else {
-          // For students, go to the student page
-          await this.router.navigate(['/student']);
-        }
-        
-        console.log('Account created successfully. Navigating to dashboard.');
+        // Redirect to email verification page
+        await this.router.navigate(['/verify-email']);
+        console.log('Account created successfully. Redirecting to email verification.');
       }
     } catch (error: any) {
       this.error = error.message || 'An error occurred during sign up';
