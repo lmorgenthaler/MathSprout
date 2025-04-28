@@ -217,23 +217,45 @@ export class SupabaseService {
   }
 
   async getStudentsByTeacher(teacherId: number) {
-    const { data, error } = await this.supabase
-      .from('students')
-      .select(`
-        *,
-        Classroom (
-          classroom_id,
-          name
-        )
-      `)
-      .eq('teacher_id', teacherId);
+    try {
+      // First try to fetch with classroom join
+      const { data, error } = await this.supabase
+        .from('students')
+        .select(`
+          *,
+          Classroom (
+            classroom_id,
+            name
+          )
+        `)
+        .eq('teacher_id', teacherId);
 
-    if (error) {
-      console.error('Error fetching students:', error);
+      if (error) {
+        console.warn('Error fetching students with classroom:', error);
+        
+        // Fall back to fetching just students without classroom join
+        const { data: studentsOnly, error: studentsError } = await this.supabase
+          .from('students')
+          .select('*')
+          .eq('teacher_id', teacherId);
+
+        if (studentsError) {
+          console.error('Error fetching students:', studentsError);
+          return [];
+        }
+
+        // Add empty classroom data to maintain consistent structure
+        return studentsOnly.map(student => ({
+          ...student,
+          Classroom: null
+        }));
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error in getStudentsByTeacher:', error);
       return [];
     }
-
-    return data;
   }
 
   async createClassroom(name: string, gradeLevel: string) {
