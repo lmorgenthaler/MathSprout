@@ -2,35 +2,36 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SupabaseService } from '../../services/supabase.service';
+import { StudentService } from '../../services/student.service';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { HttpClientModule } from '@angular/common/http';
 
 interface Student {
+  id: number;
   name: string;
   email: string;
-  student_id: string;
-  grade_level: string;
-  progress: {
+  teacher_id: number;
+  created_at: string;
+  classroom_id?: number;
+  classroom?: {
+    name: string;
+  };
+  progress?: {
     games_played: number;
     average_score: number;
     time_spent: number;
-  };
-  classroom_id?: number;
-  teacher_id?: number;
-  classroom?: {
-    name: string;
   };
 }
 
 @Component({
   selector: 'app-students',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, HttpClientModule],
   templateUrl: './students.component.html'
 })
 export class StudentsComponent implements OnInit {
   students: Student[] = [];
-  teachers: any[] = [];
   classrooms: any[] = [];
   currentTeacher: any = null;
   showModal = false;
@@ -42,17 +43,14 @@ export class StudentsComponent implements OnInit {
 
   constructor(
     private supabaseService: SupabaseService,
+    private studentService: StudentService,
     private fb: FormBuilder,
     private router: Router
   ) {
     this.studentForm = this.fb.group({
       first_name: ['', Validators.required],
       last_name: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      student_id: ['', Validators.required],
-      grade_level: ['', Validators.required],
-      teacher_id: ['', Validators.required],
-      classroom_id: [null]
+      email: ['', [Validators.required, Validators.email]]
     });
   }
 
@@ -96,52 +94,12 @@ export class StudentsComponent implements OnInit {
     }
   }
 
-  async loadTeachers() {
-    try {
-      const { data: teachers, error } = await this.supabaseService.getTeachers();
-      if (error) {
-        console.error('Error loading teachers:', error);
-        return;
-      }
-      this.teachers = teachers || [];
-    } catch (error) {
-      console.error('Error loading teachers:', error);
-    }
-  }
-
-  async loadClassrooms() {
-    try {
-      const { data: classrooms, error } = await this.supabaseService.getClassrooms();
-      if (error) {
-        console.error('Error loading classrooms:', error);
-        return;
-      }
-      this.classrooms = classrooms || [];
-    } catch (error) {
-      console.error('Error loading classrooms:', error);
-    }
-  }
-
   async loadStudents() {
     try {
-      const { data: students, error } = await this.supabaseService.getStudents();
-      if (error) {
-        console.error('Error loading students:', error);
-        return;
-      }
-      this.students = students || [];
+      this.students = await this.studentService.getStudents();
     } catch (error) {
       console.error('Error loading students:', error);
-    }
-  }
-
-  async logout() {
-    try {
-      await this.supabaseService.signOut();
-      // Don't navigate here, let the signOut method handle it
-    } catch (error) {
-      console.error('Error logging out:', error);
-      this.error = 'Error logging out. Please try again.';
+      this.error = 'Failed to load students. Please try again later.';
     }
   }
 
@@ -156,11 +114,7 @@ export class StudentsComponent implements OnInit {
     this.studentForm.patchValue({
       first_name: student.name.split(' ')[0],
       last_name: student.name.split(' ')[1],
-      email: student.email,
-      student_id: student.student_id,
-      grade_level: student.grade_level,
-      teacher_id: student.teacher_id,
-      classroom_id: student.classroom_id
+      email: student.email
     });
     this.isEditMode = true;
     this.selectedStudent = student;
@@ -175,37 +129,50 @@ export class StudentsComponent implements OnInit {
     try {
       const formData = this.studentForm.value;
       if (this.isEditMode && this.selectedStudent) {
-        const { error } = await this.supabaseService.updateStudent(this.selectedStudent.student_id, formData);
-        if (error) {
-          console.error('Error updating student:', error);
-          return;
+        const updatedStudent = await this.studentService.updateStudent(this.selectedStudent.id, {
+          name: `${formData.first_name} ${formData.last_name}`,
+          email: formData.email
+        });
+        const index = this.students.findIndex(s => s.id === updatedStudent.id);
+        if (index !== -1) {
+          this.students[index] = updatedStudent;
         }
+        this.showModal = false;
       } else {
-        const { error } = await this.supabaseService.createStudent(formData);
-        if (error) {
-          console.error('Error creating student:', error);
-          return;
-        }
+        // Generate a student ID (timestamp + random number)
+        const timestamp = Date.now().toString().slice(-6);
+        const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+        const student_id = `S${timestamp}${random}`;
+        
+        const student = await this.studentService.createStudent({
+          student_id,
+          name: `${formData.first_name} ${formData.last_name}`,
+          email: formData.email,
+          role: 'student'
+        });
+        this.students.push(student);
+        this.showModal = false;
       }
-      this.showModal = false;
-      this.loadStudents();
     } catch (error) {
       console.error('Error saving student:', error);
+      this.error = 'Failed to save student. Please try again later.';
     }
   }
 
   async deleteStudent(student: Student) {
     if (confirm('Are you sure you want to delete this student?')) {
       try {
-        const { error } = await this.supabaseService.deleteStudent(student.student_id);
-        if (error) {
-          console.error('Error deleting student:', error);
-          return;
-        }
-        this.loadStudents();
+        await this.studentService.deleteStudent(student.id);
+        this.students = this.students.filter(s => s.id !== student.id);
       } catch (error) {
         console.error('Error deleting student:', error);
+        this.error = 'Failed to delete student. Please try again later.';
       }
     }
+  }
+
+  logout() {
+    this.supabaseService.signOut();
+    this.router.navigate(['/login']);
   }
 } 

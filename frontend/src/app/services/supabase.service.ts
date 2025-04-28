@@ -9,6 +9,7 @@ import { environment } from '../../environments/environment';
 export class SupabaseService {
   private supabase: SupabaseClient;
   private userSubject = new BehaviorSubject<any>(null);
+  private sessionSubject = new BehaviorSubject<Session | null>(null);
 
   constructor() {
     this.supabase = createClient(
@@ -19,11 +20,13 @@ export class SupabaseService {
     // Check for existing session
     this.supabase.auth.getSession().then(({ data: { session } }) => {
       this.userSubject.next(session?.user ?? null);
+      this.sessionSubject.next(session);
     });
 
     // Listen for auth changes
     this.supabase.auth.onAuthStateChange((_event, session) => {
       this.userSubject.next(session?.user ?? null);
+      this.sessionSubject.next(session);
     });
   }
 
@@ -155,45 +158,44 @@ export class SupabaseService {
 
       // First try to get the teacher
       console.log('Fetching existing teacher record...');
-      const { data: existingTeacher, error: fetchError } = await this.supabase
+      const { data: existingTeachers, error: fetchError } = await this.supabase
         .from('teachers')
         .select('*')
-        .eq('user_id', user.id)
-        .single();
+        .eq('user_id', user.id);
 
       if (fetchError) {
         console.error('Error fetching teacher:', fetchError);
-        
-        // If teacher doesn't exist, create one
-        if (fetchError.code === 'PGRST116') {
-          console.log('Teacher not found, creating new teacher record...');
-          const { data: newTeacher, error: createError } = await this.supabase
-            .from('teachers')
-            .insert([
-              {
-                user_id: user.id,
-                first_name: user.user_metadata?.['full_name']?.split(' ')[0] || user.email?.split('@')[0] || 'Teacher',
-                last_name: user.user_metadata?.['full_name']?.split(' ')[1] || '',
-                email: user.email
-              }
-            ])
-            .select()
-            .single();
-
-          if (createError) {
-            console.error('Error creating teacher:', createError);
-            return null;
-          }
-
-          console.log('Successfully created new teacher:', newTeacher);
-          return newTeacher;
-        }
-        
         return null;
       }
 
-      console.log('Found existing teacher:', existingTeacher);
-      return existingTeacher;
+      if (!existingTeachers || existingTeachers.length === 0) {
+        console.log('Teacher not found, creating new teacher record...');
+        const { data: newTeacher, error: createError } = await this.supabase
+          .from('teachers')
+          .insert([
+            {
+              user_id: user.id,
+              first_name: user.user_metadata?.['name']?.split(' ')[0] || user.email?.split('@')[0] || 'Teacher',
+              last_name: user.user_metadata?.['name']?.split(' ')[1] || '',
+              email: user.email
+            }
+          ])
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('Error creating teacher:', createError);
+          return null;
+        }
+
+        console.log('Successfully created new teacher:', newTeacher);
+        return newTeacher;
+      }
+
+      // If multiple teachers exist, take the first one
+      const teacher = existingTeachers[0];
+      console.log('Found existing teacher:', teacher);
+      return teacher;
     } catch (error) {
       console.error('Error in getCurrentTeacher:', error);
       return null;
@@ -289,32 +291,27 @@ export class SupabaseService {
   }
 
   async createStudent(studentData: any) {
-    // Ensure teacher_id is set from the current teacher
-    const teacher = await this.getCurrentTeacher();
-    if (!teacher) {
-      throw new Error('No teacher found');
-    }
+    try {
+      const session = await this.supabase.auth.getSession();
+      const response = await fetch('/api/students', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.data.session?.access_token}`
+        },
+        body: JSON.stringify(studentData)
+      });
 
-    // Prepare the student data
-    const studentToCreate = {
-      ...studentData,
-      teacher_id: teacher.teacher_id,
-      // Only include classroom_id if it's provided
-      ...(studentData.classroom_id ? { classroom_id: studentData.classroom_id } : {})
-    };
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to create student');
+      }
 
-    const { data, error } = await this.supabase
-      .from('students')
-      .insert([studentToCreate])
-      .select()
-      .single();
-
-    if (error) {
+      return await response.json();
+    } catch (error) {
       console.error('Error creating student:', error);
       throw error;
     }
-
-    return data;
   }
 
   async updateStudent(studentId: string, studentData: any) {
@@ -329,5 +326,9 @@ export class SupabaseService {
       .from('students')
       .delete()
       .eq('student_id', studentId);
+  }
+
+  getSession(): Session | null {
+    return this.sessionSubject.value;
   }
 } 
