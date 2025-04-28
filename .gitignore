@@ -1,0 +1,14 @@
+# Angular build and cache files
+node_modules/
+.angular/
+dist/
+build/
+
+# Supabase
+.branches
+.temp
+
+# dotenvx
+.env.keys
+.env.local
+.env.*.local

@@ -1,0 +1,1 @@
+This is our project for Westminster's University class CMPT 322 Software Engineering. MathSprout is a web application that teaches 1st to 2nd graders about math through various minigames. They learn fundamentals such as digit recognition through pattern matching, addition and subtraction.
