@@ -8,19 +8,33 @@ build/
 # Angular cache
 .angular/
 
-# Python venv
+# Python virtual environment
 backend/venv/
 
-# macOS files
+# macOS system files
 .DS_Store
 
-# VSCode settings
+# Visual Studio Code settings
 .vscode/
-# Supabase
-.branches
-.temp
 
-# dotenvx
-.env.keys
+# Supabase generated folders
+.branches/
+.temp/
+
+# Environment variable files
+.env
+.env.*
 .env.local
 .env.*.local
+.env.keys
+
+# Log files
+*.log
+
+# IDE related (optional, but safe to add)
+.idea/
+*.iml
+
+# npm lock file (optional depending on whether you use yarn or npm consistently)
+# package-lock.json
+# yarn.lock

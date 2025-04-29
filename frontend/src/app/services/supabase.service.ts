@@ -14,7 +14,7 @@ export class SupabaseService {
   constructor() {
     this.supabase = createClient(
       environment.supabaseUrl,
-      environment.supabaseAnonKey
+      environment.supabaseKey
     );
 
     // Check for existing session
