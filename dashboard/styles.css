@@ -1,0 +1,152 @@
+/*
+MathSprout Dashboard Styles
+==========================
+
+This file contains all the styling rules for the MathSprout student dashboard.
+It implements a modern, clean, and responsive design that enhances the user
+experience while maintaining consistency across different devices and browsers.
+
+Key Design Features:
+- Modern card-based layout with subtle shadows and hover effects
+- Responsive grid system for optimal display on all screen sizes
+- Consistent color scheme and typography
+- Interactive elements with smooth transitions
+- Accessible color contrast and text sizing
+
+The styles are organized into sections:
+- Base styles and layout
+- Card and component styles
+- Progress indicators and charts
+- Table and data display
+- Responsive adjustments
+- Achievement badges and special elements
+
+Design Principles:
+- Clean and minimal aesthetic
+- Clear visual hierarchy
+- Consistent spacing and alignment
+- Smooth animations and transitions
+- High contrast for readability
+- Mobile-first approach
+
+Last Updated: [Current Date]
+Version: 1.0.0
+*/
+
+/* Dashboard Styles */
+body {
+    background-color: #f8f9fa;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.card-header {
+    background-color: white;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    border-top-left-radius: 10px !important;
+    border-top-right-radius: 10px !important;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.stat-item h6 {
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.stat-item p {
+    color: #212529;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.level-progress {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.level-card {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.level-card.locked {
+    opacity: 0.5;
+}
+
+.level-card .level-number {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.level-card .progress {
+    height: 8px;
+    margin-top: 0.5rem;
+}
+
+.table th {
+    font-weight: 600;
+    color: #495057;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.achievement-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #ffd700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0.25rem;
+}
+
+.achievement-badge img {
+    width: 24px;
+    height: 24px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .level-progress {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+} 

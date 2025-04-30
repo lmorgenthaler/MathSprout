@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Math Game{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Add Supabase client -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <!-- Add game stats collector -->
+    <script src="../functions/game_stats.js"></script>
+    <style>
+        /* Base styles for all games */
+        body {
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background: repeating-linear-gradient(
+                90deg,
+                #ffe6e6,
+                #ffe6e6 60px,
+                #e6f7e6 60px,
+                #e6f7e6 120px
+            );
+            font-family: 'Playfair Display', serif;
+        }
+
+        .mathsprout-logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #2e7d32;
+            font-size: 56px;
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            z-index: 2;
+        }
+
+        .score-display {
+            position: absolute;
+            top: 120px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-size: 24px;
+            color: #333;
+            text-align: right;
+            z-index: 1;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .points-display {
+            margin-top: 10px;
+            font-size: 20px;
+            color: #666;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            position: fixed;
+            top: 50%;
+            left: 20px;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #ffe6e6, #e6f7e6);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            height: 500px;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid rgba(46, 125, 50, 0.5);
+        }
+
+        .control-button {
+            margin: 2px 0;
+            padding: 5.625px 11.25px;
+            font-size: 22.5px;
+            position: relative;
+            border: none;
+            border-radius: 4px;
+            background-color: rgba(46, 125, 50, 0.2);
+            color: #333;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .control-button:hover::after {
+            content: attr(aria-label);
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+
+        .score-display div {
+            margin-bottom: 0;
+            display: block;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <!-- MathSprout logo -->
+    <div class="mathsprout-logo" aria-label="MathSprout Logo">MathSprout 🌱</div>
+
+    <!-- Score display section -->
+    <div class="score-display" aria-live="polite">
+        <span>Score: <span id="score">0</span></span><br>
+        <div class="points-display">Points Available: <span id="points-available">10</span></div><br>
+        <div>Remaining Questions: <span id="remaining-questions">5</span></div><br>
+        <div>Correctly Answered: <span id="correctly-answered">0</span></div><br>
+        <div>Total Number Answered: <span id="total-number-answered">0</span></div><br>
+        <div>Accuracy: <span id="accuracy">0.00</span>%</div><br>
+        <div>Total Time Spent: <span id="total-time-spent">0.00</span> seconds</div>
+    </div>
+
+    <!-- Game content -->
+    {% block content %}{% endblock %}
+
+    <!-- Control panel -->
+    <div class="control-panel">
+        <button class="control-button" aria-label="Home">
+            <img src="home_11869504.png" alt="Home Icon" style="width: 24px; height: 24px;">
+        </button>
+        <button class="control-button" aria-label="Settings">
+            <img src="gear_.png" alt="Settings Icon" style="width: 24px; height: 24px;">
+        </button>
+        <button class="control-button" aria-label="Mute">
+            <img src="mute_.png" alt="Mute Icon" style="width: 24px; height: 24px;">
+        </button>
+        <button class="control-button" aria-label="Exit">
+            <img src="exit_.png" alt="Exit Icon" style="width: 24px; height: 24px;">
+        </button>
+    </div>
+
+    <!-- Audio elements -->
+    <audio id="correct-sound" src="__correct.wav" preload="auto"></audio>
+    <audio id="incorrect-sound" src="__wrong-answer-incorrect-error.wav" preload="auto"></audio>
+
+    <!-- Base game script -->
+    <script>
+        // Initialize game stats
+        initGameStats('{% block game_type %}{% endblock %}', {% block game_level %}{% endblock %});
+
+        // Game state variables
+        let score = 0;
+        let points = 10;
+        let remainingQuestions = 5;
+        let correctlyAnswered = 0;
+        let totalNumberAnswered = 0;
+        let totalTimeSpent = 0;
+        let questionStartTime = null;
+
+        // Function to update the stats display
+        function updateStatsDisplay() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('points-available').textContent = points;
+            document.getElementById('remaining-questions').textContent = remainingQuestions;
+            document.getElementById('correctly-answered').textContent = correctlyAnswered;
+            document.getElementById('total-number-answered').textContent = totalNumberAnswered;
+            document.getElementById('accuracy').textContent = calculateAccuracy().toFixed(2);
+            document.getElementById('total-time-spent').textContent = totalTimeSpent.toFixed(2);
+            
+            // Update game stats collector
+            updateGameStats(score, points, remainingQuestions, correctlyAnswered, totalNumberAnswered);
+        }
+
+        // Function to calculate accuracy
+        function calculateAccuracy() {
+            return totalNumberAnswered > 0 ? (correctlyAnswered / totalNumberAnswered) * 100 : 0;
+        }
+
+        // Function to record a question attempt
+        function recordQuestionAttempt(question, answer, isCorrect, timeTaken) {
+            // This function is defined in game_stats.js
+            window.gameStatsCollector.recordQuestionAttempt(question, answer, isCorrect, timeTaken);
+        }
+
+        // Function to submit final stats
+        async function submitFinalStats() {
+            // This function is defined in game_stats.js
+            return await window.gameStatsCollector.submitFinalStats();
+        }
+
+        // Event listener for mute button
+        document.querySelector('.control-button[aria-label="Mute"]').addEventListener('click', function() {
+            const correctSound = document.getElementById('correct-sound');
+            const incorrectSound = document.getElementById('incorrect-sound');
+            const isMuted = correctSound.muted;
+
+            correctSound.muted = !isMuted;
+            incorrectSound.muted = !isMuted;
+
+            if (correctSound.muted) {
+                this.style.background = 'repeating-linear-gradient(45deg, #ffe6e6, #ffe6e6 10px, #e6f7e6 10px, #e6f7e6 20px)';
+            } else {
+                this.style.background = 'rgba(46, 125, 50, 0.2)';
+            }
+        });
+
+        // Initialize the game
+        window.addEventListener('load', function() {
+            updateStatsDisplay();
+        });
+    </script>
+</body>
+</html> 

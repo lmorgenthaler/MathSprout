@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Addition Level 3</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Add Supabase client -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <!-- Add game stats collector -->
+    <script src="../functions/game_stats.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background: repeating-linear-gradient(90deg, #f3e5f5, #f3e5f5 60px, #e1bee7 60px, #e1bee7 120px);
+            font-family: 'Playfair Display', serif;
+        }
+
+        .mathsprout-logo, .main-title, .classroom-title, .score-display, .points-display, .feedback, .continue-button {
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .mathsprout-logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #7e57c2;
+            font-size: 56px;
+            font-style: italic;
+            z-index: 2;
+        }
+
+        .title-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .main-title {
+            font-size: 72px;
+            line-height: 0.75;
+            margin: 0;
+            font-weight: normal;
+        }
+
+        .classroom-title {
+            font-size: 36px;
+            margin-top: 20px;
+            font-weight: normal;
+        }
+
+        .game-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 80px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .number-column {
+            display: grid;
+            grid-template-rows: repeat(5, auto);
+            gap: 5px;
+            justify-items: center;
+            max-width: 150px;
+            margin-left: -20px;
+        }
+
+        .number-choice {
+            width: 120px;
+            height: 90px;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(103, 58, 183, 0.5);
+            border-radius: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            cursor: grab;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            color: #444;
+            user-select: none;
+            background-color: #e1bee7;
+        }
+
+        .number-choice:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .equation-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #f3e5f5, #d1c4e9);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(103, 58, 183, 0.5);
+            border-radius: 50px;
+            padding: 60px 100px;
+            font-size: 64px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            color: #333;
+            flex-grow: 1;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .answer-box {
+            width: 120px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            border: 2px dashed rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+            font-size: 48px;
+            text-align: center;
+        }
+
+        .score-display {
+            position: absolute;
+            top: 120px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-size: 24px;
+            color: #333;
+            text-align: right;
+            z-index: 1;
+        }
+
+        .points-display, .metrics-display {
+            margin-top: 10px;
+            font-size: 20px;
+            color: #666;
+        }
+
+        .continue-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 20px;
+            background: linear-gradient(135deg, #ffe6e6, #e6f7e6);
+            color: #333;
+            border: 2px solid rgba(46, 125, 50, 0.5);
+            border-radius: 25px;
+            cursor: pointer;
+            display: none;
+            transition: all 0.3s ease;
+            background-color: #7e57c2;
+        }
+
+        .continue-button:hover {
+            background: rgba(46, 125, 50, 0.3);
+        }
+
+        .continue-button.visible {
+            display: block;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 24px;
+            color: #333;
+        }
+
+        .plant-icon {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 80px;
+            animation: sway 2s infinite alternate ease-in-out;
+        }
+
+        @keyframes sway {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(5deg); }
+        }
+
+        @keyframes correctShake {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes incorrectShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .equation-box.correct {
+            background: rgba(76, 175, 80, 0.2);
+            border-color: rgba(76, 175, 80, 0.5);
+            animation: correctShake 0.5s ease;
+        }
+
+        .equation-box.incorrect {
+            background: rgba(244, 67, 54, 0.2);
+            border-color: rgba(244, 67, 54, 0.5);
+            animation: incorrectShake 0.5s ease;
+        }
+
+        .feedback.correct {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .feedback.incorrect {
+            color: #F44336;
+            font-weight: bold;
+        }
+
+        .number-choice.correct {
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+            border-color: rgba(76, 175, 80, 0.8);
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        .wiggle-grow {
+            animation: wiggleGrow 1s ease-in-out 2;
+        }
+
+        .drag-hint, .drop-hint {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            font-size: 18px;
+            color: #333;
+            z-index: 10;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        .drag-hint.visible, .drop-hint.visible {
+            opacity: 1;
+        }
+
+        .prompt-text {
+            font-size: 20px;
+            white-space: normal;
+            text-align: center;
+            margin: 0 10px;
+        }
+
+        .equation-text {
+            font-size: 64px;
+        }
+
+        .green-text {
+            color: green;
+        }
+
+        .hint-button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 20px;
+            background: rgba(46, 125, 50, 0.2);
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: #9575cd;
+        }
+
+        .hint-button:hover {
+            background: rgba(46, 125, 50, 0.3);
+        }
+
+        .hint-display {
+            margin-top: 10px;
+            font-size: 24px;
+            color: #333;
+            text-align: center;
+        }
+
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            position: fixed;
+            top: 50%;
+            left: 20px;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #f3e5f5, #d1c4e9);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            height: 500px;
+            justify-content: center;
+            border: 2px solid rgba(103, 58, 183, 0.5);
+        }
+
+        .control-button {
+            margin: 2px 0;
+            padding: 5.625px 11.25px;
+            font-size: 22.5px;
+            position: relative;
+            border: none;
+            border-radius: 4px;
+            background-color: rgba(103, 58, 183, 0.2);
+            color: #333;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .control-button:hover::after {
+            content: attr(aria-label);
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            transform: translateY(-50%);
+            background-color: rgba(103, 58, 183, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+
+        .answer-input {
+            margin-top: -15px;
+            margin-left: 10px;
+            width: 100px;
+            height: 50px;
+            font-size: 24px;
+            text-align: center;
+            border: 2px solid #7e57c2;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            color: #333;
+        }
+
+        .answer-input:focus {
+            border-color: #5e35b1;
+            box-shadow: 0 0 10px rgba(94, 53, 177, 0.5);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .final-results {
+            background: linear-gradient(135deg, #f3e5f5, #d1c4e9);
+            border: 2px solid rgba(103, 58, 183, 0.5);
+        }
+
+        .control-button[aria-label="Mute"] {
+            background-color: rgba(103, 58, 183, 0.2);
+        }
+
+        .control-button[aria-label="Mute"]:hover::after {
+            background-color: rgba(103, 58, 183, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <div class="mathsprout-logo" aria-label="MathSprout Logo">MathSprout 🌱</div>
+
+    <div class="score-display" aria-live="polite">
+        <span>Score: <span id="score">0</span></span>
+        <div class="points-display">Points Available: <span id="points-available">10</span></div>
+        <div class="metrics-display">
+            <div>Correctly Answered: <span id="correctly-answered">0</span></div>
+            <div>Total Number Answered: <span id="total-number-answered">0</span></div>
+            <div>Accuracy: <span id="accuracy">0</span>%</div>
+            <div>Total Time Spent: <span id="total-time-spent">0</span> seconds</div>
+        </div>
+    </div>
+
+    <div class="title-section">
+        <h1 class="main-title">Addition<br>Level 3</h1>
+        <h2 class="classroom-title">Mrs. Kathryn Lenth's First Grade Classroom:<br>[Student Name]'s Homework</h2>
+    </div>
+
+    <div class="game-area" role="region" aria-label="Game Area">
+        <div class="number-column" id="number-choices" role="list" aria-label="Number Choices">
+            <!-- Numbers will be generated here -->
+        </div>
+
+        <div class="equation-box" role="region" aria-label="Equation Box">
+            <span id="equation" aria-live="assertive">Enter your answer below:</span>
+            <input type="text" id="answer-input" class="answer-input" placeholder="?">
+            <div class="feedback" id="feedback" aria-live="polite"></div>
+        </div>
+    </div>
+
+    <div class="plant-icon" role="img" aria-label="Plant Icon">🪴</div>
+
+    <div class="control-panel">
+        <button class="control-button" aria-label="Home">
+            <img src="home_11869504.png" alt="Home Icon" style="width: 24px; height: 24px;">
+        </button>
+        <button class="control-button" aria-label="Settings">
+            <img src="gear_.png" alt="Settings Icon" style="width: 24px; height: 24px;">
+        </button>
+        <button class="control-button" aria-label="Mute">
+            <img src="mute_.png" alt="Mute Icon" style="width: 24px; height: 24px;">
+        </button>
+        <button class="control-button" aria-label="Exit">
+            <img src="exit_.png" alt="Exit Icon" style="width: 24px; height: 24px;">
+        </button>
+    </div>
+
+    <audio id="correct-sound" src="__correct.wav" preload="auto"></audio>
+    <audio id="incorrect-sound" src="__wrong-answer-incorrect-error.wav" preload="auto"></audio>
+    <script>
+        let currentAnswer = 0;
+        let points = 10;
+        let score = 0;
+        let questionCount = 0;
+        let isProcessing = false;
+        const TOTAL_QUESTIONS = 25;
+        let timer;
+        let timeLeft = 30;
+        let correctlyAnswered = 0;
+        let totalTimeSpent = 0;
+        let totalAttempts = 0;
+        let correctAttempts = 0;
+        let totalNumberAnswered = 0;
+
+        if (!localStorage.getItem('gamePoints')) {
+            localStorage.setItem('gamePoints', '10');
+        }
+
+        function getPoints() {
+            return parseInt(localStorage.getItem('gamePoints'));
+        }
+
+        function setPoints(value) {
+            localStorage.setItem('gamePoints', value.toString());
+            document.getElementById('points-available').textContent = value;
+        }
+
+        function generateNewEquation() {
+            const num1 = Math.floor(Math.random() * 40) + 10;
+            const num2 = Math.floor(Math.random() * 40) + 10;
+            currentAnswer = num1 + num2;
+
+            const equationElement = document.getElementById('equation');
+            const answerInput = document.getElementById('answer-input');
+
+            const promptElement = document.createElement('div');
+            promptElement.className = 'prompt-text';
+            promptElement.innerHTML = 'Use the <span style="font-weight: bold; color: #7e57c2;">keyboard</span> to type your answer and press <span style="font-weight: bold; color: #7e57c2;">Enter</span> when you are ready to check your answer.';
+
+            equationElement.innerHTML = '';
+            equationElement.appendChild(promptElement);
+            equationElement.appendChild(document.createTextNode(`${num1} + ${num2} =`));
+            equationElement.appendChild(answerInput);
+
+            answerInput.value = '';
+            answerInput.focus();
+        }
+
+        const encouragingMessages = [
+            "Keep trying! You're learning with each attempt!",
+            "You've got this! Try another strategy.",
+            "Don't give up - math takes practice!",
+            "Getting closer! Give it another try.",
+            "Making mistakes helps our brain grow!",
+            "Take your time and try again!",
+            "You can do this - keep going!",
+            "Every attempt makes you stronger!",
+            "Math champions never give up!",
+            "Think carefully and try once more!"
+        ];
+
+        function startTimer() {
+            if (timer) {
+                clearInterval(timer);
+            }
+
+            const timerElement = document.getElementById('timer');
+            if (!timerElement) {
+                const newTimerElement = document.createElement('div');
+                newTimerElement.id = 'timer';
+                newTimerElement.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    right: 20px;
+                    transform: translateY(-50%);
+                    background: rgba(255, 255, 255, 0.2);
+                    backdrop-filter: blur(8px);
+                    padding: 20px 40px;
+                    border-radius: 25px;
+                    font-size: 48px;
+                    color: #1e88e5;
+                    text-align: center;
+                `;
+                document.body.appendChild(newTimerElement);
+            }
+
+            const startTime = Date.now();
+
+            timer = setInterval(() => {
+                console.log('Timer tick:', timeLeft);
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    console.log('Timer stopped: timeLeft is 0');
+                    showFinalResults();
+                } else {
+                    timeLeft--;
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    document.getElementById('timer').textContent = `Time Left: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                }
+            }, 1000);
+
+            return function stopTimer() {
+                clearInterval(timer);
+                console.log('Timer manually stopped');
+                return (Date.now() - startTime) / 1000; // Return time spent in seconds
+            };
+        }
+
+        function incrementCorrectlyAnswered() {
+            correctlyAnswered++;
+        }
+
+        function calculateAccuracy() {
+            return totalAttempts > 0 ? (correctAttempts / totalAttempts) * 100 : 0;
+        }
+
+        function updateMetricsDisplay() {
+            document.getElementById('correctly-answered').textContent = correctlyAnswered;
+            document.getElementById('total-time-spent').textContent = totalTimeSpent.toFixed(2);
+            document.getElementById('accuracy').textContent = calculateAccuracy().toFixed(2);
+            document.getElementById('total-number-answered').textContent = totalNumberAnswered;
+        }
+
+        function nextQuestion() {
+            setTimeout(() => {
+                if (timeLeft > 0) {
+                    clearGameState();
+                    generateNewEquation();
+                } else {
+                    showFinalResults();
+                }
+            }, 1500); // 1.5 seconds delay
+        }
+
+        function checkAnswer() {
+            if (isProcessing) return;
+            isProcessing = true;
+
+            console.log('checkAnswer function called');
+
+            const userAnswer = parseInt(document.getElementById('answer-input').value);
+            const feedback = document.getElementById('feedback');
+            const equationBox = document.querySelector('.equation-box');
+            const correctSound = document.getElementById('correct-sound');
+            const incorrectSound = document.getElementById('incorrect-sound');
+
+            try {
+                totalAttempts++;
+                totalNumberAnswered++;
+                if (userAnswer === currentAnswer) {
+                    console.log('Correct answer');
+                    correctSound.play();
+                    feedback.textContent = `Correct! You earned ${getPoints()} points!`;
+                    feedback.classList.add('correct');
+                    equationBox.classList.add('correct');
+
+                    score += getPoints();
+                    document.getElementById('score').textContent = score;
+
+                    setPoints(10);
+                    incrementCorrectlyAnswered();
+                    correctAttempts++;
+                    // Do not stop the timer here
+
+                    // Update metrics display after a correct answer
+                    updateMetricsDisplay();
+
+                    // Ensure nextQuestion is called after a correct answer
+                    nextQuestion();
+                    return;
+                } else {
+                    console.log('Incorrect answer');
+                    incorrectSound.play();
+                    feedback.textContent = `The correct answer is ${currentAnswer}. Try again!`;
+                    feedback.classList.add('incorrect');
+                    equationBox.classList.add('incorrect');
+
+                    let currentPoints = getPoints();
+                    setPoints(Math.max(0, currentPoints - 1));
+                }
+
+                // Update metrics display after an incorrect answer
+                updateMetricsDisplay();
+
+                questionCount++;
+                console.log('Question count:', questionCount);
+
+                nextQuestion(); // Move to the next question after displaying feedback
+            } catch (error) {
+                console.error('Error in checkAnswer:', error);
+            } finally {
+                isProcessing = false;
+            }
+        }
+
+        function continueGame() {
+            if (isProcessing) return;
+            isProcessing = true;
+            
+            try {
+                if (questionCount >= TOTAL_QUESTIONS) {
+                    showFinalResults();
+                    return;
+                }
+
+                clearGameState();
+                generateNewEquation();
+            } catch (error) {
+                console.error('Error in continueGame:', error);
+            } finally {
+                isProcessing = false;
+            }
+        }
+
+        function clearGameState() {
+            const equationBox = document.querySelector('.equation-box');
+            if (equationBox) {
+                equationBox.classList.remove('correct', 'incorrect');
+            }
+
+            const feedback = document.getElementById('feedback');
+            if (feedback) {
+                feedback.textContent = '';
+                feedback.className = 'feedback';
+            }
+        }
+
+        function restartGame() {
+            if (isProcessing) return;
+            isProcessing = true;
+            
+            try {
+                questionCount = 0;
+                score = 0;
+                setPoints(10);
+
+                const scoreDisplay = document.querySelector('.score-display');
+                if (scoreDisplay) {
+                    scoreDisplay.innerHTML = `
+                        Score: <span id="score">0</span><br>
+                        Points Available: <span id="points-available">10</span><br>
+                        Remaining Questions: <span id="questions-remaining">25</span>
+                    `;
+                }
+                
+                const results = document.querySelector('.final-results');
+                if (results) {
+                    results.remove();
+                }
+                
+                const equationBox = document.querySelector('.equation-box');
+                const feedback = document.getElementById('feedback');
+
+                if (equationBox) {
+                    equationBox.style.display = 'flex';
+                    equationBox.classList.remove('correct', 'incorrect');
+                }
+                if (feedback) {
+                    feedback.style.display = 'block';
+                    feedback.textContent = '';
+                    feedback.classList.remove('correct', 'incorrect');
+                }
+
+                generateNewEquation();
+            } catch (error) {
+                console.error('Error in restartGame:', error);
+            } finally {
+                isProcessing = false;
+            }
+        }
+
+        function initializeGame() {
+            points = 10;
+            score = 0;
+            totalAttempts = 0;
+            correctAttempts = 0;
+            totalNumberAnswered = 0;
+            totalTimeSpent = 0;
+            correctlyAnswered = 0;
+            timeLeft = 30;
+
+            document.getElementById('points-available').textContent = points;
+            document.getElementById('score').textContent = score;
+            document.getElementById('correctly-answered').textContent = correctlyAnswered;
+            document.getElementById('total-time-spent').textContent = totalTimeSpent.toFixed(2);
+            document.getElementById('accuracy').textContent = calculateAccuracy().toFixed(2);
+            document.getElementById('total-number-answered').textContent = totalNumberAnswered;
+
+            document.getElementById('equation').textContent = 'Pick a number and drop it here\n!';
+            generateNewEquation();
+        }
+
+        function showFinalResults() {
+            clearInterval(timer);
+            const resultsDiv = document.createElement('div');
+            resultsDiv.className = 'final-results';
+            resultsDiv.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, #f3e5f5, #d1c4e9);
+                border: 2px solid rgba(103, 58, 183, 0.5);
+                border-radius: 25px;
+                box-shadow: 0 0 30px rgba(0,0,0,0.3);
+                text-align: center;
+                z-index: 1000;
+                width: 80%;
+                max-width: 500px;
+                padding: 40px;
+                color: #7e57c2;
+            `;
+
+            resultsDiv.innerHTML = `
+                <h2 style="color: #7e57c2; margin-bottom: 20px; font-size: 32px;">Game Complete!</h2>
+                <p style="font-size: 28px; margin-bottom: 15px;">Your Total Score: ${score}</p>
+            `;
+
+            const equationBox = document.querySelector('.equation-box');
+            const feedback = document.getElementById('feedback');
+            const timerElement = document.getElementById('timer');
+
+            if (equationBox) equationBox.style.display = 'none';
+            if (feedback) feedback.style.display = 'none';
+            if (timerElement) timerElement.style.display = 'none';
+
+            document.body.appendChild(resultsDiv);
+        }
+
+        window.addEventListener('load', function() {
+            initializeGame();
+            if (!timer) { // Ensure the timer is only started once
+                startTimer();
+            }
+        });
+
+        document.getElementById('answer-input').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+
+        document.querySelector('.control-button[aria-label="Mute"]').addEventListener('click', function() {
+            const correctSound = document.getElementById('correct-sound');
+            const incorrectSound = document.getElementById('incorrect-sound');
+            const isMuted = correctSound.muted;
+
+            correctSound.muted = !isMuted;
+            incorrectSound.muted = !isMuted;
+
+            // Update the button's appearance based on the mute state
+            this.style.background = correctSound.muted ? 'repeating-linear-gradient(45deg, #f3e5f5, #f3e5f5 10px, #d1c4e9 10px, #d1c4e9 20px)' : 'rgba(103, 58, 183, 0.2)';
+            this.style.border = correctSound.muted ? '2px solid rgba(46, 125, 50, 0.5)' : 'none';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Addition Level 1</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Add Supabase client -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <!-- Add game stats collector -->
+    <script src="../functions/game_stats.js"></script>
+    <style>
+        /* Basic styling for the body with a repeating linear gradient background and font settings */
+        body {
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background: repeating-linear-gradient(
+                90deg,
+                #ffe6e6,
+                #ffe6e6 60px,
+                #e6f7e6 60px,
+                #e6f7e6 120px
+            );
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Styling for the MathSprout logo with positioning and color */
+        .mathsprout-logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #2e7d32;
+            font-size: 56px;
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            z-index: 2;
+        }
+
+        /* Title section styling with center alignment and text shadow */
+        .title-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        /* Main title styling with large font size and shadow */
+        .main-title {
+            font-size: 72px;
+            line-height: 0.75;
+            margin: 0;
+            font-weight: normal;
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Classroom title styling with medium font size and shadow */
+        .classroom-title {
+            font-size: 36px;
+            margin-top: 20px;
+            margin-left: 0;
+            font-weight: normal;
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Game area styling with flexbox layout for center alignment */
+        .game-area {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 80px;
+            margin: 0 auto;
+            padding: 0;
+            max-width: 800px;
+        }
+
+        /* Number column styling for grid layout of number choices */
+        .number-column {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: repeat(5, auto);
+            grid-gap: 5px;
+            justify-items: center;
+            max-width: 150px;
+            margin-right: 0px;
+            margin-left: -20px;
+        }
+
+        /* Styling for individual number choices with hover effects */
+        .number-choice {
+            grid-column: 1;
+            width: 120px;
+            height: 90px;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(46, 125, 50, 0.5);
+            border-radius: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            cursor: grab;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            color: #444;
+            position: relative;
+            user-select: none;
+            margin: 0;
+        }
+
+        /* Hover effect for number choices to scale and add shadow */
+        .number-choice:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Equation box styling with flexbox layout and gradient background */
+        .equation-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #ffe6e6, #e6f7e6);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(46, 125, 50, 0.5);
+            border-radius: 50px;
+            padding: 60px 100px;
+            font-size: 64px;
+            gap: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            position: relative;
+            color: #333;
+            flex-grow: 1;
+            max-width: 600px;
+            margin-left: 0px;
+            text-align: center;
+        }
+
+        /* Answer box styling with dashed border and transition effects */
+        .answer-box {
+            width: 120px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            border: 2px dashed rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            font-size: 48px;
+            text-align: center;
+        }
+
+        /* Score display styling with absolute positioning and blur effect */
+        .score-display {
+            position: absolute;
+            top: 120px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-size: 24px;
+            color: #333;
+            text-align: right;
+            z-index: 1;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Points display styling with smaller font size and shadow */
+        .points-display {
+            margin-top: 10px;
+            font-size: 20px;
+            color: #666;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Continue button styling with gradient background and shadow */
+        .continue-button {
+            margin-top: 20px;
+            position: relative;
+            padding: 10px 20px;
+            font-size: 20px;
+            background: linear-gradient(135deg, #ffe6e6, #e6f7e6);
+            color: #333;
+            border: 2px solid rgba(46, 125, 50, 0.5);
+            border-radius: 25px;
+            cursor: pointer;
+            display: none;  /* Hide by default */
+            opacity: 1;     /* Ensure full opacity when shown */
+            transition: all 0.3s ease;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Hover effect for continue button to change background */
+        .continue-button:hover {
+            background: rgba(46, 125, 50, 0.3);
+        }
+
+        /* Visibility class for continue button */
+        .continue-button.visible {
+            display: block;
+        }
+
+        /* Feedback styling with text shadow and color */
+        .feedback {
+            position: relative;
+            bottom: 0;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 24px;
+            color: #333;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Plant icon styling with animation */
+        .plant-icon {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 80px;
+            animation: sway 2s infinite alternate ease-in-out;
+        }
+
+        /* Keyframes for plant icon sway animation */
+        @keyframes sway {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(5deg); }
+        }
+
+        /* Keyframes for correct answer shake animation */
+        @keyframes correctShake {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Keyframes for incorrect answer shake animation */
+        @keyframes incorrectShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* Correct answer styling with light green background and animation */
+        .equation-box.correct {
+            background: rgba(76, 175, 80, 0.2);  /* Light green */
+            border-color: rgba(76, 175, 80, 0.5);
+            animation: correctShake 0.5s ease;
+        }
+
+        /* Incorrect answer styling with light red background and animation */
+        .equation-box.incorrect {
+            background: rgba(244, 67, 54, 0.2);  /* Light red */
+            border-color: rgba(244, 67, 54, 0.5);
+            animation: incorrectShake 0.5s ease;
+        }
+
+        /* Feedback styling for correct answers with green color */
+        .feedback.correct {
+            color: #4CAF50;  /* Green */
+            font-weight: bold;
+        }
+
+        /* Feedback styling for incorrect answers with red color */
+        .feedback.incorrect {
+            color: #F44336;  /* Red */
+            font-weight: bold;
+        }
+
+        /* Glow effect for correct number choice */
+        .number-choice.correct {
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+            border-color: rgba(76, 175, 80, 0.8);
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        /* Text shadow styling for various elements */
+        body, .mathsprout-logo, .main-title, .classroom-title, .score-display, .points-display, .feedback, .continue-button {
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Keyframes for wiggle grow animation */
+        @keyframes wiggleGrow {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(-5deg); }
+            50% { transform: scale(1.2) rotate(5deg); }
+            75% { transform: scale(1.1) rotate(-5deg); }
+        }
+
+        /* Wiggle grow animation class */
+        .wiggle-grow {
+            animation: wiggleGrow 1s ease-in-out 2; /* Run animation twice */
+        }
+
+        /* Drag and drop hint styling with shadow and transition */
+        .drag-hint, .drop-hint {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            font-size: 18px;
+            color: #333;
+            z-index: 10;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        /* Visibility class for drag and drop hints */
+        .drag-hint.visible, .drop-hint.visible {
+            opacity: 1;
+        }
+
+        /* Prompt text styling with smaller font size and nowrap */
+        .prompt-text {
+            font-size: 24px; /* Smaller font size for prompt */
+            white-space: nowrap; /* Prevent line breaks */
+        }
+
+        /* Equation text styling with large font size */
+        .equation-text {
+            font-size: 64px; /* Keep the equation font size */
+        }
+
+        /* Green text styling */
+        .green-text {
+            color: green;
+        }
+
+        /* Hint button styling with background color and shadow */
+        .hint-button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 20px;
+            background: rgba(46, 125, 50, 0.2);
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        /* Hover effect for hint button to change background */
+        .hint-button:hover {
+            background: rgba(46, 125, 50, 0.3);
+        }
+
+        /* Hint display styling with text shadow and color */
+        .hint-display {
+            margin-top: 10px;
+            font-size: 24px;
+            color: #333;
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Control panel styling with flexbox layout and gradient background */
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px; /* Add gap between buttons */
+            position: fixed;
+            top: 50%;
+            left: 20px;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #ffe6e6, #e6f7e6);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            height: 500px; /* Extend the height of the control panel */
+            justify-content: center; /* Center buttons vertically */
+            align-items: center; /* Center buttons horizontally */
+            border: 2px solid rgba(46, 125, 50, 0.5);
+        }
+
+        /* Control button styling with reduced padding and font size */
+        .control-button {
+            margin: 2px 0;
+            padding: 5.625px 11.25px; /* Further reduce padding by 25% */
+            font-size: 22.5px; /* Further reduce font size by 25% */
+            position: relative;
+            border: none;
+            border-radius: 4px;
+            background-color: rgba(46, 125, 50, 0.2);
+            color: #333;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        /* Tooltip styling for control button hover state */
+        .control-button:hover::after {
+            content: attr(aria-label);
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+
+        /* Ensure all metrics are visible and have a smaller font size */
+        .score-display div {
+            margin-bottom: 0;
+            display: block;
+            font-size: 16px;
+        }
+
+        .control-button[aria-label="Mute"] {
+            background-image: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- MathSprout logo with aria-label for accessibility -->
+    <div class="mathsprout-logo" aria-label="MathSprout Logo">MathSprout 🌱</div>
+
+    <!-- Score display section with live updates for accessibility -->
+    <div class="score-display" aria-live="polite">
+        <span>Score: <span id="score">0</span></span><br>
+        <div class="points-display">Points Available: <span id="points-available">10</span></div><br>
+        <div>Remaining Questions: <span id="remaining-questions">5</span></div><br>
+        <div>Correctly Answered: <span id="correctly-answered">0</span></div><br>
+        <div>Total Number Answered: <span id="total-number-answered">0</span></div><br>
+        <div>Accuracy: <span id="accuracy">0.00</span>%</div><br>
+        <div>Total Time Spent: <span id="total-time-spent">0.00</span> seconds</div>
+    </div>
+
+    <!-- Title section with main and classroom titles -->
+    <div class="title-section">
+        <h1 class="main-title">Addition<br>Level 1</h1>
+        <h2 class="classroom-title">Mrs. Kathryn Lenth's First Grade Classroom:<br>[Student Name]'s Homework</h2>
+    </div>
+
+    <!-- Game area with number choices and equation box -->
+    <div class="game-area" role="region" aria-label="Game Area">
+        <div class="number-column" id="number-choices" role="list" aria-label="Number Choices">
+            <!-- Numbers will be generated here -->
+            <div class="drag-hint" id="drag-hint">Drag the correct answer!</div>
+        </div>
+
+        <!-- Equation box with input and feedback elements -->
+        <div class="equation-box" role="region" aria-label="Equation Box">
+            <span id="equation" aria-live="assertive">Pick a number and drop it here!</span>
+            <div id="answer-box" class="answer-box" role="textbox" aria-readonly="true">
+                <div class="drop-hint" id="drop-hint">Drag correct answer here!</div>
+            </div>
+            <div class="feedback" id="feedback" aria-live="polite"></div>
+            <button id="continue-button" class="continue-button" tabindex="0">Continue</button>
+
+            <button id="hint-button" class="hint-button">Show Hint</button>
+            <div id="hint-display" class="hint-display"></div>
+        </div>
+    </div>
+
+    <!-- Plant icon with animation for visual effect -->
+    <div class="plant-icon" role="img" aria-label="Plant Icon">🪴</div>
+
+    <!-- Control panel with navigation buttons -->
+    <div class="control-panel">
+        <button class="control-button" aria-label="Home">
+            <img src="home_11869504.png" alt="Home Icon" style="width: 24px; height: 24px;">
+        </button>
+        <button class="control-button" aria-label="Settings">
+            <img src="gear_.png" alt="Settings Icon" style="width: 24px; height: 24px;">
+        </button>
+        <button class="control-button" aria-label="Mute">
+            <img src="mute_.png" alt="Mute Icon" style="width: 24px; height: 24px;">
+        </button>
+        <button class="control-button" aria-label="Exit">
+            <img src="exit_.png" alt="Exit Icon" style="width: 24px; height: 24px;">
+        </button>
+    </div>
+
+    <!-- Audio elements for correct and incorrect answer sounds -->
+    <audio id="correct-sound" src="__correct.wav" preload="auto"></audio>
+    <audio id="incorrect-sound" src="__wrong-answer-incorrect-error.wav" preload="auto"></audio>
+    <script>
+        // Initialize game stats
+        initGameStats('addition', 1);
+
+        // Game state variables
+        let score = 0;
+        let points = 10;
+        let remainingQuestions = 5;
+        let correctlyAnswered = 0;
+        let totalNumberAnswered = 0;
+        let totalTimeSpent = 0;
+        let questionStartTime = null;
+
+        // Function to update the stats display
+        function updateStatsDisplay() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('points-available').textContent = points;
+            document.getElementById('remaining-questions').textContent = remainingQuestions;
+            document.getElementById('correctly-answered').textContent = correctlyAnswered;
+            document.getElementById('total-number-answered').textContent = totalNumberAnswered;
+            document.getElementById('accuracy').textContent = calculateAccuracy().toFixed(2);
+            document.getElementById('total-time-spent').textContent = totalTimeSpent.toFixed(2);
+            
+            // Update game stats collector
+            updateGameStats(score, points, remainingQuestions, correctlyAnswered, totalNumberAnswered);
+        }
+
+        // Function to calculate accuracy
+        function calculateAccuracy() {
+            return totalNumberAnswered > 0 ? (correctlyAnswered / totalNumberAnswered) * 100 : 0;
+        }
+
+        // Function to generate a new question
+        function generateQuestion() {
+            const num1 = Math.floor(Math.random() * 5) + 1;
+            const num2 = Math.floor(Math.random() * 5) + 1;
+            currentQuestion = {
+                question: `${num1} + ${num2}`,
+                answer: num1 + num2
+            };
+            document.getElementById('equation').textContent = currentQuestion.question;
+            questionStartTime = Date.now();
+        }
+
+        // Function to check answer
+        function checkAnswer(answer) {
+            const isCorrect = answer === currentQuestion.answer;
+            const timeTaken = (Date.now() - questionStartTime) / 1000; // Convert to seconds
+            
+            // Record the question attempt
+            recordQuestionAttempt(currentQuestion.question, answer, isCorrect, timeTaken);
+            
+            if (isCorrect) {
+                score += 2;
+                points -= 2;
+                correctlyAnswered++;
+                document.getElementById('feedback').textContent = 'Correct!';
+                document.getElementById('feedback').style.color = '#2e7d32';
+            } else {
+                document.getElementById('feedback').textContent = 'Try again!';
+                document.getElementById('feedback').style.color = '#d32f2f';
+            }
+            
+            totalNumberAnswered++;
+            remainingQuestions--;
+            updateStatsDisplay();
+            
+            if (remainingQuestions === 0) {
+                // Game over, submit stats
+                submitFinalStats().then(success => {
+                    if (success) {
+                        console.log('Stats submitted successfully');
+                    } else {
+                        console.error('Failed to submit stats');
+                    }
+                });
+            }
+        }
+
+        // Initialize the game
+        function initGame() {
+            // Create number choices
+            const numberColumn = document.getElementById('number-choices');
+            for (let i = 1; i <= 10; i++) {
+                const numberChoice = document.createElement('div');
+                numberChoice.className = 'number-choice';
+                numberChoice.textContent = i;
+                numberChoice.addEventListener('click', () => {
+                    document.getElementById('answer-box').textContent = i;
+                    checkAnswer(i);
+                });
+                numberColumn.appendChild(numberChoice);
+            }
+            
+            generateQuestion();
+            updateStatsDisplay();
+        }
+
+        // Start the game when the page loads
+        window.addEventListener('load', initGame);
+    </script>
+</body>
+</html>
+            
