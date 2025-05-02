@@ -193,3 +193,52 @@ def create_teacher(request):
             {"error": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+@api_view(['DELETE'])
+def delete_student(request, user_id):
+    """
+    Delete a student user from Supabase using admin API
+    """
+    try:
+        # Log the incoming request
+        print("🔥 Received delete student request for user_id:", user_id)
+
+        # Prepare headers for Supabase Admin API
+        headers = {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_SERVICE_ROLE_KEY,
+            "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}"
+        }
+
+        # Call Supabase Admin API to delete user
+        response = requests.delete(
+            f"{SUPABASE_URL}/auth/v1/admin/users/{user_id}",
+            headers=headers
+        )
+
+        response_data = response.json()
+        print("🔥 Supabase response:", response_data)
+        
+        # Check if user was deleted successfully (status code 200)
+        if response.status_code == 200:
+            return Response(
+                {"message": "Student deleted successfully"},
+                status=status.HTTP_200_OK
+            )
+        else:
+            # If deletion failed
+            print(f"❌ Supabase error: {response.status_code} - {response_data}")
+            return Response(
+                {
+                    "error": "Failed to delete student",
+                    "details": response_data
+                },
+                status=response.status_code
+            )
+
+    except Exception as e:
+        print(f"❌ Exception occurred: {str(e)}")
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

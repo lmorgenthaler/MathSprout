@@ -203,44 +203,45 @@ export class StudentService {
     }
   }
 
-  async deleteStudent(id: number): Promise<void> {
+  async deleteStudent(studentId: string | number): Promise<void> {
     try {
-      // First get the student to get their user_id
+      // First get the student's user_id
       const { data: student, error: fetchError } = await this.supabaseService.supabaseClient
         .from('students')
         .select('user_id')
-        .eq('id', id)
+        .eq('id', studentId)
         .single();
 
       if (fetchError) {
         console.error('Error fetching student:', fetchError);
-        throw fetchError;
+        throw new Error('Failed to fetch student');
       }
 
       if (!student || !student.user_id) {
-        throw new Error('Student not found or missing user_id');
+        throw new Error('Student not found');
       }
 
-      // Delete from students table
+      // First delete the student record from the database
       const { error: deleteError } = await this.supabaseService.supabaseClient
         .from('students')
         .delete()
-        .eq('id', id);
+        .eq('id', studentId);
 
       if (deleteError) {
-        console.error('Error deleting student:', deleteError);
-        throw deleteError;
+        console.error('Error deleting student record:', deleteError);
+        throw new Error('Failed to delete student record');
       }
 
-      // Delete from auth.users
-      const { error: authError } = await this.supabaseService.supabaseClient.auth.admin.deleteUser(
-        student.user_id
-      );
+      // Then delete the auth user through our backend API
+      const response = await this.http.delete(
+        `${this.apiUrl}/delete-student/${student.user_id}/`
+      ).toPromise();
 
-      if (authError) {
-        console.error('Error deleting auth user:', authError);
-        throw authError;
+      if (!response) {
+        throw new Error('Failed to delete student');
       }
+
+      console.log('Student deleted successfully');
     } catch (error) {
       console.error('Error in deleteStudent:', error);
       throw error;
