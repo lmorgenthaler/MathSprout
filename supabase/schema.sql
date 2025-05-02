@@ -39,3 +39,35 @@ CREATE POLICY "Admins can manage all teachers" ON "public"."teachers" FOR ALL TO
         WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
     )
 );
+
+-- Add RLS policies for students table
+ALTER TABLE "public"."students" ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Students can view their own data" ON "public"."students" FOR SELECT TO "authenticated" USING ("user_id" = auth.uid());
+
+CREATE POLICY "Students can update their own data" ON "public"."students" FOR UPDATE TO "authenticated" USING ("user_id" = auth.uid());
+
+CREATE POLICY "Students can create their own record" ON "public"."students" FOR INSERT TO "authenticated" WITH CHECK ("user_id" = auth.uid());
+
+CREATE POLICY "Teachers can view their students" ON "public"."students" FOR SELECT TO "authenticated" USING (
+    EXISTS (
+        SELECT 1 FROM public.teachers
+        WHERE teachers.teacher_id = students.teacher_id
+        AND teachers.user_id = auth.uid()
+    )
+);
+
+CREATE POLICY "Teachers can manage their students" ON "public"."students" FOR ALL TO "authenticated" USING (
+    EXISTS (
+        SELECT 1 FROM public.teachers
+        WHERE teachers.teacher_id = students.teacher_id
+        AND teachers.user_id = auth.uid()
+    )
+);
+
+CREATE POLICY "Admins can manage all students" ON "public"."students" FOR ALL TO "authenticated" USING (
+    EXISTS (
+        SELECT 1 FROM public.profiles
+        WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
+    )
+);

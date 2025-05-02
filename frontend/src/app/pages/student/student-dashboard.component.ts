@@ -96,9 +96,56 @@ export class StudentDashboardComponent implements OnInit {
   constructor(private supabaseService: SupabaseService) {}
 
   async ngOnInit() {
-    const user = await this.supabaseService.getUser();
-    if (user?.user_metadata?.['name']) {
-      this.studentName = user.user_metadata['name'];
+    try {
+      const user = await this.supabaseService.getUser();
+      console.log('Current user:', user);
+      
+      if (!user) {
+        console.error('No user found');
+        return;
+      }
+
+      // First try to get the student record
+      const { data: existingStudents, error: fetchError } = await this.supabaseService.supabaseClient
+        .from('students')
+        .select('*')
+        .eq('user_id', user.id);
+
+      if (fetchError) {
+        console.error('Error fetching student:', fetchError);
+        return;
+      }
+
+      if (!existingStudents || existingStudents.length === 0) {
+        console.log('Student not found, creating new student record...');
+        const { data: newStudent, error: createError } = await this.supabaseService.supabaseClient
+          .from('students')
+          .insert([
+            {
+              user_id: user.id,
+              name: user.user_metadata?.['name'] || user.email?.split('@')[0] || 'Student',
+              email: user.email,
+              role: 'student'
+            }
+          ])
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('Error creating student:', createError);
+          return;
+        }
+
+        console.log('Successfully created new student:', newStudent);
+        this.studentName = newStudent.name;
+      } else {
+        // If multiple students exist, take the first one
+        const student = existingStudents[0];
+        console.log('Found existing student:', student);
+        this.studentName = student.name;
+      }
+    } catch (error) {
+      console.error('Error in ngOnInit:', error);
     }
   }
 
