@@ -11,6 +11,7 @@ export interface Student {
   student_id: string;
   teacher_id: number;
   classroom_id?: number;
+  grade_level?: number;
   classroom?: {
     name: string;
   };
@@ -97,7 +98,25 @@ export class StudentService {
       // 1. Try to find (or create) classroom
       const classroomId = await this.getOrCreateClassroom(studentData.classroom, teacher.teacher_id);
 
-      // 2. Create the auth user first through Django backend
+      // 2. Check if student already exists
+      const { data: existingStudent } = await this.supabaseService.supabaseClient
+        .from('students')
+        .select('*')
+        .eq('email', studentData.email)
+        .single();
+
+      if (existingStudent) {
+        // Student exists, update instead of create
+        return this.updateStudent(existingStudent.id, {
+          name: `${studentData.firstName} ${studentData.lastName}`,
+          email: studentData.email,
+          grade_level: studentData.grade,
+          classroom_id: classroomId,
+          student_id: studentData.student_id || ''
+        });
+      }
+
+      // 3. Create the auth user first through Django backend
       const payload = {
         email: studentData.email,
         password: studentData.password,
@@ -114,7 +133,7 @@ export class StudentService {
         throw new Error('Invalid response from backend');
       }
 
-      // 3. Insert into students table
+      // 4. Insert into students table
       const { data, error } = await this.supabaseService.supabaseClient
         .from('students')
         .insert({
@@ -131,7 +150,6 @@ export class StudentService {
         .select()
         .single();
 
-        
       if (error) {
         console.error('Error creating student in Supabase:', error);
         throw error;
@@ -144,25 +162,89 @@ export class StudentService {
     }
   }
 
-  async updateStudent(id: number, student: { name: string, email: string }): Promise<Student> {
-    const { data, error } = await this.supabaseService.supabaseClient
-      .from('students')
-      .update(student)
-      .eq('id', id)
-      .select()
-      .single();
+  async updateStudent(id: number, student: Partial<Student>): Promise<Student> {
+    try {
+      // First get the current student to ensure it exists
+      const { data: existingStudent, error: fetchError } = await this.supabaseService.supabaseClient
+        .from('students')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-    if (error) throw error;
-    return data;
+      if (fetchError) {
+        console.error('Error fetching student:', fetchError);
+        throw new Error('Student not found');
+      }
+
+      // Update the student
+      const { data, error } = await this.supabaseService.supabaseClient
+        .from('students')
+        .update({
+          name: student.name,
+          email: student.email,
+          student_id: student.student_id,
+          classroom_id: student.classroom_id,
+          grade_level: student.grade_level,
+          progress: student.progress
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating student:', error);
+        throw error;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error in updateStudent:', error);
+      throw error;
+    }
   }
 
   async deleteStudent(id: number): Promise<void> {
-    const { error } = await this.supabaseService.supabaseClient
-      .from('students')
-      .delete()
-      .eq('id', id);
+    try {
+      // First get the student to get their user_id
+      const { data: student, error: fetchError } = await this.supabaseService.supabaseClient
+        .from('students')
+        .select('user_id')
+        .eq('id', id)
+        .single();
 
-    if (error) throw error;
+      if (fetchError) {
+        console.error('Error fetching student:', fetchError);
+        throw fetchError;
+      }
+
+      if (!student || !student.user_id) {
+        throw new Error('Student not found or missing user_id');
+      }
+
+      // Delete from students table
+      const { error: deleteError } = await this.supabaseService.supabaseClient
+        .from('students')
+        .delete()
+        .eq('id', id);
+
+      if (deleteError) {
+        console.error('Error deleting student:', deleteError);
+        throw deleteError;
+      }
+
+      // Delete from auth.users
+      const { error: authError } = await this.supabaseService.supabaseClient.auth.admin.deleteUser(
+        student.user_id
+      );
+
+      if (authError) {
+        console.error('Error deleting auth user:', authError);
+        throw authError;
+      }
+    } catch (error) {
+      console.error('Error in deleteStudent:', error);
+      throw error;
+    }
   }
 
   private async getOrCreateClassroom(className: string, teacherId: number): Promise<number> {
