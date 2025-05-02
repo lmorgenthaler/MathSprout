@@ -89,4 +89,7 @@ def create_student(request):
 
     except Exception as e:
         print(f"❌ Exception occurred: {str(e)}")
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

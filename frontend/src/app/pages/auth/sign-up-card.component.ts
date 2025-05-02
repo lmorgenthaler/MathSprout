@@ -16,38 +16,61 @@ import { ButtonComponent } from "./button.component";
     ButtonComponent,
   ],
   template: `
-    <div
-      class="flex flex-col gap-6 p-8 w-full max-w-[400px] bg-white rounded-2xl shadow-lg"
-    >
-      <h2 class="text-2xl font-bold text-center text-neutral-500">
+    <div class="bg-white p-8 rounded-lg shadow-md">
+      <h2 class="text-3xl font-baloo-2 font-bold text-gray-900 mb-6 text-center">
         Create your account
       </h2>
-      <form (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
-        <app-input-field
-          type="email"
-          placeholder="Email"
-          [(value)]="email"
-          required
-        />
-        <app-input-field
-          type="password"
-          placeholder="Password"
-          [(value)]="password"
-          required
-        />
-        <app-button type="submit">
+      <p class="mb-8 text-center text-sm text-gray-600">
+        Or
+        <a routerLink="/login" class="font-medium text-green-600 hover:text-green-500">
+          sign in to your account
+        </a>
+      </p>
+
+      <form (ngSubmit)="onSubmit()" class="space-y-6">
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
+          <app-input-field
+            id="email"
+            type="email"
+            placeholder="Enter your email"
+            [(value)]="email"
+            required
+            class="mt-1 block w-full"
+          />
+        </div>
+
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+          <app-input-field
+            id="password"
+            type="password"
+            placeholder="Enter your password"
+            [(value)]="password"
+            required
+            class="mt-1 block w-full"
+          />
+        </div>
+
+        <app-button type="submit" class="w-full">
           <span>Sign up</span>
         </app-button>
       </form>
-      <div class="relative">
-        <div class="absolute inset-0 flex items-center">
-          <div class="w-full border-t border-neutral-300"></div>
+
+      <div class="mt-6">
+        <div class="relative">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-gray-300"></div>
+          </div>
+          <div class="relative flex justify-center text-sm">
+            <span class="px-2 bg-white text-gray-500">Or continue with</span>
+          </div>
         </div>
-        <div class="relative flex justify-center text-sm">
-          <span class="px-2 bg-white text-neutral-500">Or continue with</span>
+
+        <div class="mt-6">
+          <app-google-button (click)="onGoogleClick()"></app-google-button>
         </div>
       </div>
-      <app-google-button (click)="onGoogleClick()"></app-google-button>
     </div>
   `,
 })

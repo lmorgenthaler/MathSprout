@@ -16,6 +16,9 @@ import { StudentGamesComponent } from './pages/student/student-games.component';
 import { StudentStatsComponent } from './pages/student/student-stats.component';
 import { StudentSettingsComponent } from './pages/student/student-settings.component';
 import { FileUploadContainerComponent } from './pages/auth/file-upload-container.component';
+import { TeacherHomeComponent } from './pages/dashboard/home.component';
+import { StudentHomeComponent } from './pages/student/home.component';
+import { LeaderboardComponent } from './pages/dashboard/leaderboard.component';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent },
@@ -30,9 +33,11 @@ export const routes: Routes = [
     path: 'dashboard',
     component: TeacherDashboardComponent,
     children: [
-      { path: '', redirectTo: 'students', pathMatch: 'full' },
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
+      { path: 'home', component: TeacherHomeComponent },
       { path: 'students', component: StudentsComponent },
       { path: 'analytics', component: AnalyticsComponent },
+      { path: 'leaderboard', component: LeaderboardComponent },
       { path: 'settings', component: SettingsComponent },
       { path: 'profile', component: ProfileComponent }
     ]
@@ -41,7 +46,8 @@ export const routes: Routes = [
     path: 'student',
     component: StudentDashboardComponent,
     children: [
-      { path: '', redirectTo: 'profile', pathMatch: 'full' },
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
+      { path: 'home', component: StudentHomeComponent },
       { path: 'profile', component: StudentProfileComponent },
       { path: 'games', component: StudentGamesComponent },
       { path: 'stats', component: StudentStatsComponent },
