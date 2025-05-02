@@ -100,3 +100,96 @@ def create_student(request):
             {"error": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+@api_view(['POST'])
+def create_teacher(request):
+    """
+    Create a teacher record in the database for an existing Supabase user
+    """
+    try:
+        # Log the incoming request data
+        print("🔥 Received teacher request data:", request.data)
+        
+        # Extract data from request
+        data = request.data
+        email = data.get('email')
+        name = data.get('name')
+        user_id = data.get('user_id')
+
+        # Log the extracted data
+        print("🔥 Extracted teacher data:")
+        print(f"Email: {email}")
+        print(f"Name: {name}")
+        print(f"User ID: {user_id}")
+
+        if not email:
+            print("❌ Missing email")
+            return Response(
+                {"error": "Email is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not name:
+            print("❌ Missing name")
+            return Response(
+                {"error": "Name is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not user_id:
+            print("❌ Missing user_id")
+            return Response(
+                {"error": "User ID is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Prepare headers for Supabase Admin API
+        headers = {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_SERVICE_ROLE_KEY,
+            "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}"
+        }
+
+        # Update user metadata to include teacher role
+        payload = {
+            "user_metadata": {
+                "name": name,
+                "role": "teacher"
+            }
+        }
+
+        print("🔥 Updating teacher metadata in Supabase:", payload)
+
+        # Call Supabase Admin API to update user metadata
+        response = requests.put(
+            f"{SUPABASE_URL}/auth/v1/admin/users/{user_id}",
+            headers=headers,
+            json=payload
+        )
+
+        response_data = response.json()
+        print("🔥 Supabase response:", response_data)
+        
+        # Check if user was updated successfully (status code 200)
+        if response.status_code == 200:
+            return Response(
+                {"message": "Teacher account created successfully"},
+                status=status.HTTP_201_CREATED
+            )
+        else:
+            # If update failed
+            print(f"❌ Supabase error: {response.status_code} - {response_data}")
+            return Response(
+                {
+                    "error": "Failed to update teacher metadata",
+                    "details": response_data
+                },
+                status=response.status_code
+            )
+
+    except Exception as e:
+        print(f"❌ Exception occurred: {str(e)}")
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

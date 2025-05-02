@@ -6,6 +6,8 @@ import { SupabaseService } from '../../services/supabase.service';
 import { FileUploadService } from '../../services/file-upload.service';
 import { LogoComponent } from '../../shared/components/logo/logo.component';
 import { AUTH_STYLES } from '../../shared/styles/auth.styles';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-sign-up',
@@ -117,7 +119,8 @@ export class SignUpComponent implements OnInit {
     private supabaseService: SupabaseService,
     private fileUploadService: FileUploadService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private http: HttpClient
   ) {}
 
   ngOnInit() {
@@ -150,6 +153,26 @@ export class SignUpComponent implements OnInit {
       }
 
       if (user) {
+        // If this is a teacher signup, create the teacher record
+        if (this.userRole === 'teacher') {
+          try {
+            const response = await this.http.post<any>(`${environment.apiUrl}/create-teacher/`, {
+              email: this.email,
+              name: this.name,
+              user_id: user.id
+            }).toPromise();
+
+            if (!response || !response.message) {
+              throw new Error('Failed to create teacher record');
+            }
+          } catch (error: any) {
+            console.error('Error creating teacher record:', error);
+            this.error = 'Failed to create teacher account. Please try again.';
+            this.isLoading = false;
+            return;
+          }
+        }
+
         // Redirect to email verification page
         await this.router.navigate(['/verify-email']);
         console.log('Account created successfully. Redirecting to email verification.');
