@@ -4,39 +4,50 @@ import { FormsModule } from "@angular/forms";
 import { Router, ActivatedRoute } from "@angular/router";
 import { SignUpCardComponent } from "./sign-up-card.component";
 import { SupabaseService } from "../../services/supabase.service";
+import { LogoComponent } from "../../shared/components/logo/logo.component";
+import { AUTH_STYLES } from "../../shared/styles/auth.styles";
 
 @Component({
   selector: "app-sign-up-page",
   standalone: true,
-  imports: [CommonModule, FormsModule, SignUpCardComponent],
+  imports: [CommonModule, FormsModule, SignUpCardComponent, LogoComponent],
   template: `
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap"
-      rel="stylesheet"
-    />
+    <main [class]="authStyles.containerClasses">
+      <div class="flex w-full max-w-7xl gap-8 items-center justify-center">
+        <!-- Left side with logo and mascot -->
+        <div class="relative w-[32rem] h-[32rem] p-8 text-center rounded-2xl overflow-hidden">
+          <!-- Background with rounded corners -->
+          <div class="absolute inset-0 bg-[#FFF9F0] rounded-2xl"></div>
+          <!-- Outer border -->
+          <div class="absolute inset-0 border-4 border-[#8B4513] rounded-2xl"></div>
+          <!-- Inner border -->
+          <div class="absolute inset-[4px] border-8 [border-color:rgba(166,123,91,0.7)] rounded-xl"></div>
+          <!-- Content container -->
+          <div class="relative h-full flex flex-col justify-between">
+            <img 
+              src="assets/images/mathsprout-mascot.png" 
+              alt="MathSprout Mascot" 
+              class="w-96 h-96 mx-auto"
+            />
+            <app-logo size="large" />
+          </div>
+        </div>
 
-    <main
-      class="flex flex-col items-center pt-48 w-full min-h-screen bg-gray-200 max-sm:pt-24"
-    >
-      <h1
-        class="mb-6 text-5xl tracking-wider leading-10 text-center text-amber-100"
-      >
-        MathSprout
-      </h1>
-      <app-sign-up-card 
-        (signUp)="onSignUp($event)"
-        (googleSignIn)="onGoogleSignIn()"
-      ></app-sign-up-card>
-      <p *ngIf="errorMessage" class="mt-4 text-red-500">{{ errorMessage }}</p>
+        <!-- Right side with sign up form -->
+        <div class="flex-1 max-w-md">
+          <app-sign-up-card 
+            (signUp)="onSignUp($event)"
+            (googleSignIn)="onGoogleSignIn()"
+          ></app-sign-up-card>
+          <p *ngIf="errorMessage" class="mt-4 text-red-500">{{ errorMessage }}</p>
+        </div>
+      </div>
     </main>
   `,
 })
 export class SignUpPageComponent implements OnInit {
   errorMessage: string = '';
+  authStyles = AUTH_STYLES;
 
   constructor(
     private supabaseService: SupabaseService,

@@ -38,3 +38,4 @@ backend/venv/
 # npm lock file (optional depending on whether you use yarn or npm consistently)
 # package-lock.json
 # yarn.lock
+*.pyc
