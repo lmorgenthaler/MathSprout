@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pattern Matching Level 2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Basic styling for the body with a repeating linear gradient background and font settings */
+        body {
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background: repeating-linear-gradient(
+                90deg,
+                #e6f3ff,
+                #e6f3ff 60px,
+                #f0f8ff 60px,
+                #f0f8ff 120px
+            );
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Styling for the MathSprout logo with positioning and color */
+        .mathsprout-logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #4a90e2;
+            font-size: 56px;
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            z-index: 2;
+        }
+
+        /* Title section styling with center alignment and text shadow */
+        .title-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Main title styling with large font size and shadow */
+        .main-title {
+            font-size: 56px;
+            line-height: 0.75;
+            margin: 0;
+            margin-bottom: 12px;
+            font-weight: normal;
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Classroom title styling with medium font size and shadow */
+        .classroom-title {
+            font-size: 28px;
+            margin-top: 18px;
+            margin-left: 0;
+            font-weight: normal;
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Game area styling with flexbox layout for center alignment */
+        .game-area {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 80px;
+            margin: 0 auto;
+            padding: 0;
+            max-width: 800px;
+        }
+
+        /* Number column styling for grid layout of number choices */
+        .number-column {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: repeat(5, auto);
+            grid-gap: 5px;
+            justify-items: center;
+            max-width: 150px;
+            margin-right: 0px;
+            margin-left: -20px;
+        }
+
+        /* Styling for individual number choices with hover effects */
+        .number-choice {
+            grid-column: 1;
+            width: 120px;
+            height: 90px;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(74, 144, 226, 0.5);
+            border-radius: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            cursor: grab;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            color: #444;
+            position: relative;
+            user-select: none;
+            margin: 0;
+        }
+
+        /* Hover effect for number choices to scale and add shadow */
+        .number-choice:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Equation box styling with flexbox layout and gradient background */
+        .equation-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #e6f3ff, #f0f8ff);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(74, 144, 226, 0.5);
+            border-radius: 40px;
+            padding: 25px 50px;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            position: relative;
+            color: #333;
+            flex-grow: 1;
+            max-width: 600px;
+            margin-left: 0px;
+            text-align: center;
+        }
+
+        /* Answer box styling with dashed border and transition effects */
+        .answer-box {
+            width: 120px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            border: 2px dashed rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            font-size: 48px;
+            text-align: center;
+        }
+
+        /* Score display styling with absolute positioning and blur effect */
+        .score-display {
+            position: absolute;
+            top: 120px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-size: 24px;
+            color: #333;
+            text-align: right;
+            z-index: 1;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Points display styling with smaller font size and shadow */
+        .points-display {
+            margin-top: 10px;
+            font-size: 20px;
+            color: #666;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Continue button styling with gradient background and shadow */
+        .continue-button {
+            margin-top: 8px;
+            padding: 10px 20px;
+            font-size: 20px;
+            background: linear-gradient(135deg, #e6f3ff, #f0f8ff);
+            color: #333;
+            border: 2px solid rgba(74, 144, 226, 0.5);
+            border-radius: 25px;
+            cursor: pointer;
+            display: none;  /* Hide by default */
+            opacity: 1;     /* Ensure full opacity when shown */
+            transition: all 0.3s ease;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Hover effect for continue button to change background */
+        .continue-button:hover {
+            background: rgba(74, 144, 226, 0.3);
+        }
+
+        /* Visibility class for continue button */
+        .continue-button.visible {
+            display: block;
+        }
+
+        /* Feedback styling with text shadow and color */
+        .feedback {
+            font-size: 22px;
+            margin-top: 8px;
+            position: relative;
+            bottom: 0;
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Plant icon styling with animation */
+        .plant-icon {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 80px;
+            animation: sway 2s infinite alternate ease-in-out;
+        }
+
+        /* Keyframes for plant icon sway animation */
+        @keyframes sway {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(5deg); }
+        }
+
+        /* Keyframes for correct answer shake animation */
+        @keyframes correctShake {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Keyframes for incorrect answer shake animation */
+        @keyframes incorrectShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* Correct answer styling with light blue background and animation */
+        .equation-box.correct {
+            background: rgba(74, 144, 226, 0.2);  /* Light blue */
+            border-color: rgba(74, 144, 226, 0.5);
+            animation: correctShake 0.5s ease;
+        }
+
+        /* Incorrect answer styling with light red background and animation */
+        .equation-box.incorrect {
+            background: rgba(244, 67, 54, 0.2);  /* Light red */
+            border-color: rgba(244, 67, 54, 0.5);
+            animation: incorrectShake 0.5s ease;
+        }
+
+        /* Feedback styling for correct answers with blue color */
+        .feedback.correct {
+            color: #4a90e2;  /* Blue */
+            font-weight: bold;
+        }
+
+        /* Feedback styling for incorrect answers with red color */
+        .feedback.incorrect {
+            color: #F44336;  /* Red */
+            font-weight: bold;
+        }
+
+        /* Glow effect for correct number choice */
+        .number-choice.correct {
+            box-shadow: 0 0 15px rgba(74, 144, 226, 0.5);
+            border-color: rgba(74, 144, 226, 0.8);
+            background: rgba(74, 144, 226, 0.1);
+        }
+
+        /* Text shadow styling for various elements */
+        body, .mathsprout-logo, .main-title, .classroom-title, .score-display, .points-display, .feedback, .continue-button {
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Keyframes for wiggle grow animation */
+        @keyframes wiggleGrow {
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.2) rotate(-5deg); }
+            75% { transform: scale(1.2) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .animate-element {
+            animation: wiggleGrow 1s ease-in-out;
+        }
+
+        /* Initially hide elements that will be animated */
+        .hide-element {
+            opacity: 0;
+        }
+
+        /* Prevent interaction during animation */
+        .disable-interaction {
+            pointer-events: none;
+            user-select: none;
+        }
+
+        /* Wiggle grow animation class */
+        .wiggle-grow {
+            animation: wiggleGrow 1s ease-in-out 2; /* Run animation twice */
+        }
+
+        /* Drag and drop hint styling with shadow and transition */
+        .drag-hint, .drop-hint {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            font-size: 18px;
+            color: #333;
+            z-index: 10;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        /* Visibility class for drag and drop hints */
+        .drag-hint.visible, .drop-hint.visible {
+            opacity: 1;
+        }
+
+        /* Prompt text styling with smaller font size and nowrap */
+        .prompt-text {
+            font-size: 24px; /* Smaller font size for prompt */
+            white-space: nowrap; /* Prevent line breaks */
+        }
+
+        /* Equation text styling with large font size */
+        .equation-text {
+            font-size: 64px; /* Keep the equation font size */
+        }
+
+        /* Green text styling */
+        .green-text {
+            color: green;
+        }
+
+        /* Hint button styling with background color and shadow */
+        .hint-button {
+            margin-top: 8px;
+            padding: 10px 20px;
+            font-size: 20px;
+            background: rgba(74, 144, 226, 0.2);
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        /* Hover effect for hint button to change background */
+        .hint-button:hover {
+            background: rgba(74, 144, 226, 0.3);
+        }
+
+        /* Hint display styling with text shadow and color */
+        .hint-display {
+            margin-top: 10px;
+            font-size: 24px;
+            color: #333;
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            display: none;
+        }
+
+        /* Control panel styling with flexbox layout and gradient background */
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            position: fixed;
+            top: 50%;
+            left: 20px;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #e6f3ff, #f0f8ff);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            height: 500px;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid rgba(74, 144, 226, 0.5);
+        }
+
+        /* Control button styling with reduced padding and font size */
+        .control-button {
+            margin: 2px 0;
+            padding: 5.625px 11.25px;
+            font-size: 22.5px;
+            position: relative;
+            border: none;
+            border-radius: 4px;
+            background-color: rgba(74, 144, 226, 0.2);
+            color: #333;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        /* Tooltip styling for control button hover state */
+        .control-button:hover::after {
+            content: attr(aria-label);
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+
+        /* Ensure all metrics are visible and have a smaller font size */
+        .score-display div {
+            margin-bottom: 0;
+            display: block;
+            font-size: 16px;
+        }
+
+        .control-button[aria-label="Mute"] {
+            background-image: none;
+        }
+
+        .control-button[aria-label="Mute"].muted {
+            background: repeating-linear-gradient(45deg, #e6f3ff, #e6f3ff 10px, #f0f8ff 10px, #f0f8ff 20px);
+            border: 2px solid rgba(74, 144, 226, 0.5);
+        }
+
+        /* Add styling for underlined digits */
+        .digit {
+            text-decoration: underline;
+            text-underline-offset: 18px;
+            margin: 0 5px;
+            font-size: 68px;
+            color: #333;
+            padding-bottom: 18px;
+            display: inline-block;
+            line-height: 1.2;
+        }
+
+        .place-value-container {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            margin-top: 12px;
+        }
+
+        .place-value-row {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .place-value-label {
+            font-size: 20px;
+            color: #333;
+            text-align: center;
+            margin-bottom: 4px;
+        }
+
+        .place-value-input {
+            width: 70px;
+            height: 70px;
+            font-size: 32px;
+            text-align: center;
+            border: 2px solid rgba(74, 144, 226, 0.5);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .place-value-input:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 5px rgba(74, 144, 226, 0.3);
+        }
+
+        /* Add place value visualization styles after the place-value-input:focus style */
+        .place-value-hint {
+            margin-top: 10px;
+            padding: 10px;
+        }
+
+        .place-value-boxes {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .place-box {
+            width: 80px;
+            height: 80px;
+            border: 2px solid rgba(74, 144, 226, 0.5);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            position: relative;
+        }
+
+        .place-box-label {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .place-box-value {
+            font-size: 36px;
+            color: #4a90e2;
+            font-weight: bold;
+        }
+
+        .place-box-explanation {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        /* Add styling for the instruction prompt */
+        .instruction-prompt {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 12px;
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            padding: 8px 20px;
+            font-weight: 500;
+        }
+
+        .instruction-prompt .highlight {
+            color: #4a90e2;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <!-- MathSprout logo with aria-label for accessibility -->
+    <div class="mathsprout-logo" aria-label="MathSprout Logo">MathSprout 🌱</div>
+
+    <!-- Score display section with live updates for accessibility -->
+    <div class="score-display" aria-live="polite">
+        <span>Score: <span id="score">0</span></span><br>
+        <div class="points-display">Points Available: <span id="points-available">10</span></div><br>
+        <div>Remaining Questions: <span id="questions-remaining">5</span></div><br>
+        <div>Correctly Answered: <span id="correctly-answered">0</span></div><br>
+        <div>Total Number Answered: <span id="total-number-answered">0</span></div><br>
+        <div>Accuracy: <span id="accuracy">0.00</span>%</div><br>
+        <div>Total Time Spent: <span id="total-time-spent">0.00</span> seconds</div>
+    </div>
+
+    <!-- Title section with main and classroom titles -->
+    <div class="title-section">
+        <h1 class="main-title">Pattern Matching<br>Level 2</h1>
+        <h2 class="classroom-title">Mrs. Kathryn Lenth's First Grade Classroom:<br>[Student Name]'s Homework</h2>
+    </div>
+
+    <!-- Game area with number choices and equation box -->
+    <div class="game-area" role="region" aria-label="Game Area">
+        <div class="equation-box" role="region" aria-label="Equation Box">
+            <div class="instruction-prompt">
+                Look at the number below: 
+                Find the <span class="highlight">digit</span> 
+                in each <span class="highlight">place value</span> and type your answer in the <span class="highlight">boxes</span> 
+            </div>
+            <span id="equation" aria-live="assertive"></span>
+            <div class="place-value-container">
+                <div class="place-value-row">
+                    <span class="place-value-label">Hundreds:</span>
+                    <input type="text" class="place-value-input" id="hundreds-input" maxlength="1">
+                </div>
+                <div class="place-value-row">
+                    <span class="place-value-label">Tens:</span>
+                    <input type="text" class="place-value-input" id="tens-input" maxlength="1">
+                </div>
+                <div class="place-value-row">
+                    <span class="place-value-label">Ones:</span>
+                    <input type="text" class="place-value-input" id="ones-input" maxlength="1">
+                </div>
+            </div>
+            <button id="check-answer" class="continue-button" style="display: block; margin-top: 20px;">Check Answer</button>
+            <div class="feedback" id="feedback" aria-live="polite"></div>
+            <button id="continue-button" class="continue-button" tabindex="0">Continue</button>
+            <button id="hint-button" class="hint-button">Show Hint</button>
+            <div id="hint-display" class="hint-display"></div>
+        </div>
+    </div>
+
+    <!-- Plant icon with animation for visual effect -->
+    <div class="plant-icon" role="img" aria-label="Plant Icon">🪴</div>
+
+    <!-- Control panel with navigation buttons -->
+    <div class="control-panel">
+        <button class="control-button" aria-label="Home">
+            <img src="home_11869504.png" alt="Home Icon" style="width: 24px; height: 24px;">
+        </button>
+        <button class="control-button" aria-label="Settings">
+            <img src="gear_.png" alt="Settings Icon" style="width: 24px; height: 24px;">
+        </button>
+        <button class="control-button" aria-label="Mute">
+            <img src="mute_.png" alt="Mute Icon" style="width: 24px; height: 24px;">
+        </button>
+        <button class="control-button" aria-label="Exit">
+            <img src="exit_.png" alt="Exit Icon" style="width: 24px; height: 24px;">
+        </button>
+    </div>
+
+    <!-- Audio elements for correct and incorrect answer sounds -->
+    <audio id="correct-sound" src="__correct.wav" preload="auto"></audio>
+    <audio id="incorrect-sound" src="__wrong-answer-incorrect-error.wav" preload="auto"></audio>
+    <script>
+        let points = 10;
+        let score = 0;
+        let questionCount = 0;
+        let isProcessing = false;
+        const TOTAL_QUESTIONS = 5;
+        let correctlyAnswered = 0;
+        let totalNumberAnswered = 0;
+        let totalTimeSpent = 0;
+        let totalAttempts = 0;
+        let correctAttempts = 0;
+        let currentNumber = 0;
+        let startTime = null;
+        let timerInterval = null;
+        let isFirstLoad = true;  // Add this at the top with other variables
+
+        if (!localStorage.getItem('gamePoints')) {
+            localStorage.setItem('gamePoints', '10');
+        }
+
+        function getPoints() {
+            return parseInt(localStorage.getItem('gamePoints'));
+        }
+
+        function setPoints(value) {
+            localStorage.setItem('gamePoints', value.toString());
+            document.getElementById('points-available').textContent = value;
+        }
+
+        function generateNewEquation() {
+            const equationElement = document.getElementById('equation');
+            const feedback = document.getElementById('feedback');
+            const continueButton = document.getElementById('continue-button');
+            const hintButton = document.getElementById('hint-button');
+            const checkAnswerButton = document.getElementById('check-answer');
+
+            // Generate a random number between 100 and 999 to ensure we always have hundreds
+            currentNumber = Math.floor(Math.random() * 900) + 100;
+            
+            // Convert number to string and create spans for each digit
+            const digits = currentNumber.toString().split('').map(digit => 
+                `<span class="digit">${digit}</span>`
+            ).join('');
+
+            equationElement.innerHTML = digits;
+            
+            // Clear previous inputs
+            document.getElementById('hundreds-input').value = '';
+            document.getElementById('tens-input').value = '';
+            document.getElementById('ones-input').value = '';
+            
+            continueButton.style.display = 'none';
+            checkAnswerButton.style.display = 'block';
+            feedback.textContent = '';
+            feedback.className = 'feedback';
+
+            if (hintButton) {
+                hintButton.style.display = 'block';
+            }
+
+            if (isFirstLoad) {
+                // Temporarily disable buttons during animation
+                document.querySelectorAll('button').forEach(el => {
+                    el.disabled = true;
+                });
+                
+                // Start the animation sequence
+                startAnimationSequence();
+                isFirstLoad = false;
+            }
+        }
+
+        function startAnimationSequence() {
+            const sequence = [
+                {
+                    elements: [document.querySelector('.instruction-prompt .highlight:nth-child(1)')], // "digit" text
+                    delay: 0
+                },
+                {
+                    elements: [...document.querySelectorAll('.digit')], // number digits
+                    delay: 700
+                },
+                {
+                    elements: [document.querySelector('.instruction-prompt .highlight:nth-child(2)')], // "place value" text
+                    delay: 700
+                },
+                {
+                    elements: [...document.querySelectorAll('.place-value-label')], // Hundreds, Tens, Ones labels
+                    delay: 700
+                },
+                {
+                    elements: [document.querySelector('.instruction-prompt .highlight:nth-child(3)')], // "boxes" text
+                    delay: 700
+                },
+                {
+                    elements: [...document.querySelectorAll('.place-value-input')], // Input boxes
+                    delay: 700
+                }
+            ];
+
+            let totalDelay = 0;
+            sequence.forEach(({ elements, delay }) => {
+                setTimeout(() => {
+                    elements.forEach(element => {
+                        if (element) {
+                            // Remove any existing animation class
+                            element.classList.remove('animate-element');
+                            // Force a reflow to restart the animation
+                            void element.offsetWidth;
+                            // Add the animation class
+                            element.classList.add('animate-element');
+                        }
+                    });
+                }, totalDelay);
+                totalDelay += delay;
+            });
+
+            // Re-enable buttons after all animations complete
+            setTimeout(() => {
+                document.querySelectorAll('button').forEach(el => {
+                    el.disabled = false;
+                });
+            }, totalDelay + 700); // Add extra time for safety
+        }
+
+        function checkAnswer() {
+            const hundredsInput = document.getElementById('hundreds-input').value;
+            const tensInput = document.getElementById('tens-input').value;
+            const onesInput = document.getElementById('ones-input').value;
+            
+            const hundreds = Math.floor(currentNumber / 100);
+            const tens = Math.floor((currentNumber % 100) / 10);
+            const ones = currentNumber % 10;
+            
+            const feedback = document.getElementById('feedback');
+            const equationBox = document.querySelector('.equation-box');
+            const continueButton = document.getElementById('continue-button');
+            const checkAnswerButton = document.getElementById('check-answer');
+            
+            if (hundredsInput == hundreds && tensInput == tens && onesInput == ones) {
+                feedback.textContent = "Correct! You identified all place values!";
+                feedback.className = 'feedback correct';
+                equationBox.classList.add('correct');
+                document.getElementById('correct-sound').play().catch(() => {});
+                score += points;  // Add current points to score
+                points = 10;     // Reset points to 10 for next question
+                correctlyAnswered++;
+                correctAttempts++;
+            } else {
+                feedback.textContent = "Not quite right. Try again!";
+                feedback.className = 'feedback incorrect';
+                equationBox.classList.add('incorrect');
+                document.getElementById('incorrect-sound').play().catch(() => {});
+                points = Math.max(1, points - 1);  // Deduct 1 point, minimum of 1
+            }
+            
+            totalAttempts++;
+            totalNumberAnswered++;
+            updateMetricsDisplay();
+            
+            if (feedback.className.includes('correct')) {
+                checkAnswerButton.style.display = 'none';
+                continueButton.style.display = 'block';
+                continueButton.classList.add('visible');
+                questionCount++;
+                
+                if (questionCount >= TOTAL_QUESTIONS) {
+                    setTimeout(showFinalResults, 1500);
+                }
+            }
+            
+            document.getElementById('score').textContent = score;
+            document.getElementById('points-available').textContent = points;
+            document.getElementById('questions-remaining').textContent = TOTAL_QUESTIONS - questionCount;
+        }
+
+        const encouragingMessages = [
+            "Keep trying! You're learning with each attempt!",
+            "You've got this! Try another strategy.",
+            "Don't give up - math takes practice!",
+            "Getting closer! Give it another try.",
+            "Making mistakes helps our brain grow!",
+            "Take your time and try again!",
+            "You can do this - keep going!",
+            "Every attempt makes you stronger!",
+            "Math champions never give up!",
+            "Think carefully and try once more!"
+        ];
+
+        function continueGame() {
+            if (isProcessing) return;
+            isProcessing = true;
+            
+            try {
+                if (questionCount >= TOTAL_QUESTIONS) {
+                    showFinalResults();
+                    return;
+                }
+
+                clearGameState();
+                generateNewEquation();
+            } catch (error) {
+                console.error('Error in continueGame:', error);
+            } finally {
+                isProcessing = false;
+            }
+        }
+
+        function clearGameState() {
+            const equationBox = document.querySelector('.equation-box');
+            if (equationBox) {
+                equationBox.classList.remove('correct', 'incorrect');
+            }
+
+            const feedback = document.getElementById('feedback');
+            if (feedback) {
+                feedback.textContent = '';
+                feedback.className = 'feedback';
+            }
+
+            const continueButton = document.getElementById('continue-button');
+            if (continueButton) {
+                continueButton.style.display = 'none';
+                continueButton.classList.remove('visible');
+            }
+        }
+
+        function restartGame() {
+            if (isProcessing) return;
+            isProcessing = true;
+            
+            try {
+                // Reset all game state variables
+                questionCount = 0;
+                score = 0;
+                points = 10;
+                totalAttempts = 0;
+                correctAttempts = 0;
+                totalNumberAnswered = 0;
+                totalTimeSpent = 0;
+                correctlyAnswered = 0;
+                currentNumber = 0;
+                isFirstLoad = true;  // Reset isFirstLoad to true for the new session
+                
+                // Reset and start the timer
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                }
+                startTimer();
+                
+                // Update all display elements
+                document.getElementById('score').textContent = '0';
+                document.getElementById('points-available').textContent = '10';
+                document.getElementById('questions-remaining').textContent = '5';
+                document.getElementById('correctly-answered').textContent = '0';
+                document.getElementById('total-number-answered').textContent = '0';
+                document.getElementById('accuracy').textContent = '0.00';
+                document.getElementById('total-time-spent').textContent = '0.00';
+                
+                // Remove the results screen if it exists
+                const results = document.querySelector('.final-results');
+                if (results) {
+                    results.remove();
+                }
+                
+                // Reset the equation box
+                const equationBox = document.querySelector('.equation-box');
+                if (equationBox) {
+                    equationBox.style.display = 'flex';
+                    equationBox.classList.remove('correct', 'incorrect');
+                }
+
+                // Reset feedback
+                const feedback = document.getElementById('feedback');
+                if (feedback) {
+                    feedback.style.display = 'block';
+                    feedback.textContent = '';
+                    feedback.classList.remove('correct', 'incorrect');
+                }
+
+                // Reset buttons
+                const continueButton = document.getElementById('continue-button');
+                const checkAnswerButton = document.getElementById('check-answer');
+                const hintButton = document.getElementById('hint-button');
+                if (continueButton) {
+                    continueButton.style.display = 'none';
+                    continueButton.classList.remove('visible');
+                }
+                if (checkAnswerButton) {
+                    checkAnswerButton.style.display = 'block';
+                }
+                if (hintButton) {
+                    hintButton.style.display = 'block';
+                }
+
+                // Generate new equation
+                generateNewEquation();
+            } catch (error) {
+                console.error('Error in restartGame:', error);
+            } finally {
+                isProcessing = false;
+            }
+        }
+
+        function startTimer() {
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 100); // Update every 100ms for smooth display
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            if (startTime) {
+                totalTimeSpent = (Date.now() - startTime) / 1000; // Convert to seconds
+                document.getElementById('total-time-spent').textContent = totalTimeSpent.toFixed(2);
+            }
+        }
+
+        function updateTimer() {
+            if (startTime) {
+                const currentTime = (Date.now() - startTime) / 1000; // Convert to seconds
+                document.getElementById('total-time-spent').textContent = currentTime.toFixed(2);
+            }
+        }
+
+        function initializeGame() {
+            points = 10;
+            score = 0;
+            totalAttempts = 0;
+            correctAttempts = 0;
+            totalNumberAnswered = 0;
+            totalTimeSpent = 0;
+            correctlyAnswered = 0;
+            
+            // Reset and start the timer
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            startTimer();
+
+            document.getElementById('points-available').textContent = points;
+            document.getElementById('score').textContent = score;
+            document.getElementById('correctly-answered').textContent = correctlyAnswered;
+            document.getElementById('total-time-spent').textContent = '0.00';
+            document.getElementById('accuracy').textContent = calculateAccuracy().toFixed(2);
+            document.getElementById('total-number-answered').textContent = totalNumberAnswered;
+
+            document.getElementById('equation').textContent = '';
+            generateNewEquation();
+        }
+
+        window.addEventListener('load', function() {
+            initializeGame();
+            updateMetricsDisplay();
+        });
+
+        function showFinalResults() {
+            // Stop the timer when showing final results
+            stopTimer();
+
+            // Remove any existing results screen first
+            const existingResults = document.querySelector('.final-results');
+            if (existingResults) {
+                existingResults.remove();
+            }
+
+            const resultsDiv = document.createElement('div');
+            resultsDiv.className = 'final-results';
+            resultsDiv.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, #e6f3ff, #f0f8ff);
+                border: 2px solid rgba(74, 144, 226, 0.5);
+                border-radius: 15px;
+                box-shadow: 0 0 20px rgba(0,0,0,0.2);
+                text-align: center;
+                z-index: 1000;
+                width: 80%;
+                max-width: 500px;
+                padding: 30px;
+            `;
+
+            const percentage = (score / 50) * 100;
+            let message;
+            if (score === 50) {
+                message = "Perfect score, sprout! You're a math superstar! 🌟";
+            } else if (score >= 40) {
+                message = "Amazing job, sprout! You're really good at math! 🏆";
+            } else if (score >= 30) {
+                message = "Great effort, sprout! Keep practicing and you'll be a champion! 💪";
+            } else {
+                message = "Good try, sprout! Every time you practice, you get better! 🌱";
+            }
+
+            resultsDiv.innerHTML = `
+                <h2 style="color: #4a90e2; margin-bottom: 20px; font-size: 28px; font-family: 'Playfair Display', serif; text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);">Game Complete!</h2>
+                <p style="font-size: 24px; margin-bottom: 15px; color: #333; font-family: 'Playfair Display', serif; text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);">Your Score: ${score} out of 50</p>
+                <p style="font-size: 20px; margin-bottom: 25px; color: #333; font-family: 'Playfair Display', serif; text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);">${message}</p>
+                <button id="play-again" style="
+                    padding: 15px 30px;
+                    font-size: 20px;
+                    background: linear-gradient(135deg, #e6f3ff, #f0f8ff);
+                    color: #333;
+                    border: 2px solid rgba(74, 144, 226, 0.5);
+                    border-radius: 25px;
+                    cursor: pointer;
+                    font-family: 'Playfair Display', serif;
+                    text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+                    transition: all 0.3s ease;
+                ">Play Again</button>
+            `;
+
+            const equationBox = document.querySelector('.equation-box');
+            const feedback = document.getElementById('feedback');
+            const continueButton = document.getElementById('continue-button');
+            const checkAnswerButton = document.getElementById('check-answer');
+            const hintButton = document.getElementById('hint-button');
+
+            if (equationBox) equationBox.style.display = 'none';
+            if (feedback) feedback.style.display = 'none';
+            if (continueButton) continueButton.style.display = 'none';
+            if (checkAnswerButton) checkAnswerButton.style.display = 'none';
+            if (hintButton) hintButton.style.display = 'none';
+
+            document.body.appendChild(resultsDiv);
+
+            // Add event listener to the Play Again button
+            const playAgainButton = document.getElementById('play-again');
+            if (playAgainButton) {
+                // Remove any existing event listeners
+                const newPlayAgainButton = playAgainButton.cloneNode(true);
+                playAgainButton.parentNode.replaceChild(newPlayAgainButton, playAgainButton);
+                
+                // Add the new event listener
+                newPlayAgainButton.addEventListener('click', function() {
+                    resultsDiv.remove();
+                    const equationBox = document.querySelector('.equation-box');
+                    const feedback = document.getElementById('feedback');
+                    const hintButton = document.getElementById('hint-button');
+                    
+                    if (equationBox) equationBox.style.display = 'flex';
+                    if (feedback) feedback.style.display = 'block';
+                    if (hintButton) hintButton.style.display = 'block';
+                    
+                    restartGame();
+                });
+            }
+        }
+
+        const mathHints = [
+            "The first digit tells us how many HUNDREDS are in the number!",
+            "The middle digit tells us how many TENS are in the number!",
+            "The last digit tells us how many ONES are in the number!",
+            "In 352, the 3 means 3 hundreds (300), 5 means 5 tens (50), and 2 means 2 ones!",
+            "Each place has a value: Hundreds = ×100, Tens = ×10, Ones = ×1",
+            "Think of each digit as groups: Hundreds are groups of 100, Tens are groups of 10",
+            "The Hundreds digit is always the first number on the left!",
+            "The Tens digit is always in the middle!",
+            "The Ones digit is always on the right!",
+            "Remember: Each place has its own special value!"
+        ];
+
+        document.getElementById('hint-button').addEventListener('click', function() {
+            const hintButton = this;
+            const randomHint = mathHints[Math.floor(Math.random() * mathHints.length)];
+            const hintDisplay = document.getElementById('hint-display');
+            
+            // Show the hint text
+            hintDisplay.textContent = randomHint;
+            hintDisplay.style.display = 'block';
+            
+            hintButton.disabled = true;
+
+            setTimeout(() => {
+                hintDisplay.style.display = 'none';
+                hintButton.disabled = false;
+            }, 8000); // Keep hint visible for 8 seconds
+        });
+
+        document.querySelector('.control-button[aria-label="Mute"]').addEventListener('click', function() {
+            const correctSound = document.getElementById('correct-sound');
+            const incorrectSound = document.getElementById('incorrect-sound');
+            const isMuted = correctSound.muted;
+
+            correctSound.muted = !isMuted;
+            incorrectSound.muted = !isMuted;
+
+            // Toggle the muted class for styling
+            this.classList.toggle('muted');
+        });
+
+        window.addEventListener('load', function() {
+            window.moveTo(0, 0);
+            window.resizeTo(screen.width, screen.height);
+        });
+
+        function calculateAccuracy() {
+            return totalAttempts > 0 ? (correctAttempts / totalAttempts) * 100 : 0;
+        }
+
+        function updateMetricsDisplay() {
+            document.getElementById('correctly-answered').textContent = correctlyAnswered;
+            document.getElementById('total-number-answered').textContent = totalNumberAnswered;
+            document.getElementById('accuracy').textContent = calculateAccuracy().toFixed(2);
+            document.getElementById('total-time-spent').textContent = totalTimeSpent.toFixed(2);
+        }
+
+        // Add event listener for the check answer button
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('check-answer').addEventListener('click', checkAnswer);
+            
+            // Add event listener for the continue button
+            document.getElementById('continue-button').addEventListener('click', continueGame);
+            
+            // Add event listeners for input validation
+            const inputs = document.querySelectorAll('.place-value-input');
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

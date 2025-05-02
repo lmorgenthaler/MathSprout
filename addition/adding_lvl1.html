@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Addition Level 1</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Basic styling for the body with a repeating linear gradient background and font settings */
+        body {
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background: repeating-linear-gradient(
+                90deg,
+                #ffe6e6,
+                #ffe6e6 60px,
+                #e6f7e6 60px,
+                #e6f7e6 120px
+            );
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Styling for the MathSprout logo with positioning and color */
+        .mathsprout-logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #2e7d32;
+            font-size: 56px;
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            z-index: 2;
+        }
+
+        /* Title section styling with center alignment and text shadow */
+        .title-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        /* Main title styling with large font size and shadow */
+        .main-title {
+            font-size: 72px;
+            line-height: 0.75;
+            margin: 0;
+            font-weight: normal;
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Classroom title styling with medium font size and shadow */
+        .classroom-title {
+            font-size: 36px;
+            margin-top: 20px;
+            margin-left: 0;
+            font-weight: normal;
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Game area styling with flexbox layout for center alignment */
+        .game-area {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 80px;
+            margin: 0 auto;
+            padding: 0;
+            max-width: 800px;
+        }
+
+        /* Number column styling for grid layout of number choices */
+        .number-column {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: repeat(5, auto);
+            grid-gap: 5px;
+            justify-items: center;
+            max-width: 150px;
+            margin-right: 0px;
+            margin-left: -20px;
+        }
+
+        /* Styling for individual number choices with hover effects */
+        .number-choice {
+            grid-column: 1;
+            width: 120px;
+            height: 90px;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(46, 125, 50, 0.5);
+            border-radius: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            cursor: grab;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            color: #444;
+            position: relative;
+            user-select: none;
+            margin: 0;
+        }
+
+        /* Hover effect for number choices to scale and add shadow */
+        .number-choice:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Equation box styling with flexbox layout and gradient background */
+        .equation-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #ffe6e6, #e6f7e6);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(46, 125, 50, 0.5);
+            border-radius: 50px;
+            padding: 60px 100px;
+            font-size: 64px;
+            gap: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            position: relative;
+            color: #333;
+            flex-grow: 1;
+            max-width: 600px;
+            margin-left: 0px;
+            text-align: center;
+        }
+
+        /* Answer box styling with dashed border and transition effects */
+        .answer-box {
+            width: 120px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            border: 2px dashed rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            font-size: 48px;
+            text-align: center;
+        }
+
+        /* Score display styling with absolute positioning and blur effect */
+        .score-display {
+            position: absolute;
+            top: 120px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-size: 24px;
+            color: #333;
+            text-align: right;
+            z-index: 1;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Points display styling with smaller font size and shadow */
+        .points-display {
+            margin-top: 10px;
+            font-size: 20px;
+            color: #666;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Continue button styling with gradient background and shadow */
+        .continue-button {
+            margin-top: 20px;
+            position: relative;
+            padding: 10px 20px;
+            font-size: 20px;
+            background: linear-gradient(135deg, #ffe6e6, #e6f7e6);
+            color: #333;
+            border: 2px solid rgba(46, 125, 50, 0.5);
+            border-radius: 25px;
+            cursor: pointer;
+            display: none;  /* Hide by default */
+            opacity: 1;     /* Ensure full opacity when shown */
+            transition: all 0.3s ease;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Hover effect for continue button to change background */
+        .continue-button:hover {
+            background: rgba(46, 125, 50, 0.3);
+        }
+
+        /* Visibility class for continue button */
+        .continue-button.visible {
+            display: block;
+        }
+
+        /* Feedback styling with text shadow and color */
+        .feedback {
+            position: relative;
+            bottom: 0;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 24px;
+            color: #333;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Plant icon styling with animation */
+        .plant-icon {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 80px;
+            animation: sway 2s infinite alternate ease-in-out;
+        }
+
+        /* Keyframes for plant icon sway animation */
+        @keyframes sway {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(5deg); }
+        }
+
+        /* Keyframes for correct answer shake animation */
+        @keyframes correctShake {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Keyframes for incorrect answer shake animation */
+        @keyframes incorrectShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* Correct answer styling with light green background and animation */
+        .equation-box.correct {
+            background: rgba(76, 175, 80, 0.2);  /* Light green */
+            border-color: rgba(76, 175, 80, 0.5);
+            animation: correctShake 0.5s ease;
+        }
+
+        /* Incorrect answer styling with light red background and animation */
+        .equation-box.incorrect {
+            background: rgba(244, 67, 54, 0.2);  /* Light red */
+            border-color: rgba(244, 67, 54, 0.5);
+            animation: incorrectShake 0.5s ease;
+        }
+
+        /* Feedback styling for correct answers with green color */
+        .feedback.correct {
+            color: #4CAF50;  /* Green */
+            font-weight: bold;
+        }
+
+        /* Feedback styling for incorrect answers with red color */
+        .feedback.incorrect {
+            color: #F44336;  /* Red */
+            font-weight: bold;
+        }
+
+        /* Glow effect for correct number choice */
+        .number-choice.correct {
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+            border-color: rgba(76, 175, 80, 0.8);
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        /* Text shadow styling for various elements */
+        body, .mathsprout-logo, .main-title, .classroom-title, .score-display, .points-display, .feedback, .continue-button {
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Keyframes for wiggle grow animation */
+        @keyframes wiggleGrow {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(-5deg); }
+            50% { transform: scale(1.2) rotate(5deg); }
+            75% { transform: scale(1.1) rotate(-5deg); }
+        }
+
+        /* Wiggle grow animation class */
+        .wiggle-grow {
+            animation: wiggleGrow 1s ease-in-out 2; /* Run animation twice */
+        }
+
+        /* Drag and drop hint styling with shadow and transition */
+        .drag-hint, .drop-hint {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            font-size: 18px;
+            color: #333;
+            z-index: 10;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        /* Visibility class for drag and drop hints */
+        .drag-hint.visible, .drop-hint.visible {
+            opacity: 1;
+        }
+
+        /* Prompt text styling with smaller font size and nowrap */
+        .prompt-text {
+            font-size: 24px; /* Smaller font size for prompt */
+            white-space: nowrap; /* Prevent line breaks */
+        }
+
+        /* Equation text styling with large font size */
+        .equation-text {
+            font-size: 64px; /* Keep the equation font size */
+        }
+
+        /* Green text styling */
+        .green-text {
+            color: green;
+        }
+
+        /* Hint button styling with background color and shadow */
+        .hint-button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 20px;
+            background: rgba(46, 125, 50, 0.2);
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        /* Hover effect for hint button to change background */
+        .hint-button:hover {
+            background: rgba(46, 125, 50, 0.3);
+        }
+
+        /* Hint display styling with text shadow and color */
+        .hint-display {
+            margin-top: 10px;
+            font-size: 24px;
+            color: #333;
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Control panel styling with flexbox layout and gradient background */
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px; /* Add gap between buttons */
+            position: fixed;
+            top: 50%;
+            left: 20px;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #ffe6e6, #e6f7e6);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            height: 500px; /* Extend the height of the control panel */
+            justify-content: center; /* Center buttons vertically */
+            align-items: center; /* Center buttons horizontally */
+            border: 2px solid rgba(46, 125, 50, 0.5);
+        }
+
+        /* Control button styling with reduced padding and font size */
+        .control-button {
+            margin: 2px 0;
+            padding: 5.625px 11.25px; /* Further reduce padding by 25% */
+            font-size: 22.5px; /* Further reduce font size by 25% */
+            position: relative;
+            border: none;
+            border-radius: 4px;
+            background-color: rgba(46, 125, 50, 0.2);
+            color: #333;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        /* Tooltip styling for control button hover state */
+        .control-button:hover::after {
+            content: attr(aria-label);
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+
+        /* Ensure all metrics are visible and have a smaller font size */
+        .score-display div {
+            margin-bottom: 0;
+            display: block;
+            font-size: 16px;
+        }
+
+        .control-button[aria-label="Mute"] {
+            background-image: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- MathSprout logo with aria-label for accessibility -->
+    <div class="mathsprout-logo" aria-label="MathSprout Logo">MathSprout 🌱</div>
+
+    <!-- Score display section with live updates for accessibility -->
+    <div class="score-display" aria-live="polite">
+        <span>Score: <span id="score">0</span></span><br>
+        <div class="points-display">Points Available: <span id="points-available">10</span></div><br>
+        <div>Remaining Questions: <span id="questions-remaining">5</span></div><br>
+        <div>Correctly Answered: <span id="correctly-answered">0</span></div><br>
+        <div>Total Number Answered: <span id="total-number-answered">0</span></div><br>
+        <div>Accuracy: <span id="accuracy">0.00</span>%</div><br>
+        <div>Total Time Spent: <span id="total-time-spent">0.00</span> seconds</div>
+    </div>
+
+    <!-- Title section with main and classroom titles -->
+    <div class="title-section">
+        <h1 class="main-title">Addition<br>Level 1</h1>
+        <h2 class="classroom-title">Mrs. Kathryn Lenth's First Grade Classroom:<br>[Student Name]'s Homework</h2>
+    </div>
+
+    <!-- Game area with number choices and equation box -->
+    <div class="game-area" role="region" aria-label="Game Area">
+        <div class="number-column" id="number-choices" role="list" aria-label="Number Choices">
+            <!-- Numbers will be generated here -->
+            <div class="drag-hint" id="drag-hint">Drag the correct answer!</div>
+        </div>
+
+        <!-- Equation box with input and feedback elements -->
+        <div class="equation-box" role="region" aria-label="Equation Box">
+            <span id="equation" aria-live="assertive">Pick a number and drop it here!</span>
+            <div id="answer-box" class="answer-box" role="textbox" aria-readonly="true">
+                <div class="drop-hint" id="drop-hint">Drag correct answer here!</div>
+            </div>
+            <div class="feedback" id="feedback" aria-live="polite"></div>
+            <button id="continue-button" class="continue-button" tabindex="0">Continue</button>
+
+            <button id="hint-button" class="hint-button">Show Hint</button>
+            <div id="hint-display" class="hint-display"></div>
+        </div>
+    </div>
+
+    <!-- Plant icon with animation for visual effect -->
+    <div class="plant-icon" role="img" aria-label="Plant Icon">🪴</div>
+
+    <!-- Control panel with navigation buttons -->
+    <div class="control-panel">
+        <button class="control-button" aria-label="Home">
+            <img src="home_11869504.png" alt="Home Icon" style="width: 24px; height: 24px;">
+        </button>
+        <button class="control-button" aria-label="Settings">
+            <img src="gear_.png" alt="Settings Icon" style="width: 24px; height: 24px;">
+        </button>
+        <button class="control-button" aria-label="Mute">
+            <img src="mute_.png" alt="Mute Icon" style="width: 24px; height: 24px;">
+        </button>
+        <button class="control-button" aria-label="Exit">
+            <img src="exit_.png" alt="Exit Icon" style="width: 24px; height: 24px;">
+        </button>
+    </div>
+
+    <!-- Audio elements for correct and incorrect answer sounds -->
+    <audio id="correct-sound" src="__correct.wav" preload="auto"></audio>
+    <audio id="incorrect-sound" src="__wrong-answer-incorrect-error.wav" preload="auto"></audio>
+    <script>
+        // Initialize game variables
+        let draggedElement = null;
+        let currentAnswer = 0;
+        let points = 10;
+        let score = 0;
+        let questionCount = 0;
+        let isProcessing = false;  // Add state lock
+        let isAnimating = false;  // Add a flag to track animation state
+        const TOTAL_QUESTIONS = 5;
+        let correctlyAnswered = 0;
+        let totalNumberAnswered = 0;
+        let totalTimeSpent = 0;
+        let totalAttempts = 0;
+        let correctAttempts = 0;
+
+        // Initialize points only if it doesn't exist in localStorage
+        if (!localStorage.getItem('gamePoints')) {
+            localStorage.setItem('gamePoints', '10');
+        }
+
+        // Helper functions to get/set points
+        function getPoints() {
+            return parseInt(localStorage.getItem('gamePoints'));
+        }
+
+        function setPoints(value) {
+            localStorage.setItem('gamePoints', value.toString());
+            document.getElementById('points-available').textContent = value;
+        }
+
+        // Function to generate a new addition equation
+        function generateNewEquation() {
+            const num1 = Math.floor(Math.random() * 9) + 1;
+            const num2 = Math.floor(Math.random() * 9) + 1;
+            currentAnswer = num1 + num2;
+
+            const equationElement = document.getElementById('equation');
+            const answerBox = document.getElementById('answer-box');
+            const continueButton = document.getElementById('continue-button');
+            const feedback = document.getElementById('feedback');
+            const hintButton = document.getElementById('hint-button');
+
+            // Update equation text and reset answer box
+            equationElement.innerHTML = '<span class="prompt-text">Pick a <span id="number-text">number</span> from the bubbles, drag it and drop it <span id="here-text">here!</span></span><br><span class="equation-text">' + `${num1} + ${num2} =` + '</span>';
+            answerBox.textContent = '';
+            continueButton.style.display = 'none';
+            continueButton.classList.remove('visible');
+            feedback.textContent = '';
+            feedback.className = 'feedback';
+
+            if (hintButton) {
+                hintButton.style.display = 'block';
+            }
+
+            generateAnswerChoices();
+
+            // Initial animation for the first question
+            if (questionCount === 0) {
+                const numberChoices = document.querySelectorAll('.number-choice');
+                const numberText = document.getElementById('number-text');
+                setTimeout(() => {
+                    numberChoices.forEach(choice => {
+                        choice.classList.add('wiggle-grow');
+                        choice.style.backgroundColor = 'green';
+                    });
+                    numberText.classList.add('wiggle-grow');
+                    numberText.style.color = 'green';
+
+                    setTimeout(() => {
+                        numberChoices.forEach(choice => {
+                            choice.classList.remove('wiggle-grow');
+                            choice.style.backgroundColor = '';
+                        });
+                        numberText.classList.remove('wiggle-grow');
+                        numberText.style.color = '';
+
+                        const answerBox = document.getElementById('answer-box');
+                        if (answerBox) {
+                            answerBox.classList.add('wiggle-grow');
+                            document.getElementById('here-text').classList.add('green-text');
+                            answerBox.style.backgroundColor = 'green';
+                            setTimeout(() => {
+                                answerBox.classList.remove('wiggle-grow');
+                                document.getElementById('here-text').classList.remove('green-text');
+                                answerBox.style.backgroundColor = '';
+                            }, 1500);
+                        }
+                    }, 2000);
+                }, 1000);
+            }
+        }
+
+        // Function to generate answer choices for the equation
+        function generateAnswerChoices() {
+            const choices = new Set([currentAnswer]);
+            while (choices.size < 5) {
+                let wrongAnswer = currentAnswer + Math.floor(Math.random() * 7) - 3;
+                if (wrongAnswer > 0 && wrongAnswer !== currentAnswer) {
+                    choices.add(wrongAnswer);
+                }
+            }
+
+            const shuffledChoices = Array.from(choices).sort(() => Math.random() - 0.5);
+            document.getElementById('number-choices').innerHTML = shuffledChoices
+                .map(number => `<div class="number-choice" draggable="true" data-value="${number}">${number}</div>`)
+                .join('');
+
+            setupDragAndDrop();
+        }
+
+        // Function to setup drag and drop functionality for number choices
+        function setupDragAndDrop() {
+            const numbers = document.querySelectorAll('.number-choice');
+            const answerBox = document.getElementById('answer-box');
+
+            numbers.forEach(number => {
+                number.setAttribute('tabindex', '0');
+                number.removeEventListener('dragstart', handleDragStart);
+                number.removeEventListener('dragend', handleDragEnd);
+                number.addEventListener('dragstart', handleDragStart);
+                number.addEventListener('dragend', handleDragEnd);
+            });
+            
+            answerBox.removeEventListener('dragover', handleDragOver);
+            answerBox.removeEventListener('drop', handleDrop);
+            answerBox.addEventListener('dragover', handleDragOver);
+            answerBox.addEventListener('drop', handleDrop);
+        }
+
+        // Event handler for drag start
+        function handleDragStart(e) {
+            if (isProcessing) return;
+            draggedElement = this;
+            this.style.opacity = '0.5';
+        }
+
+        // Event handler for drag end
+        function handleDragEnd(e) {
+            if (isProcessing) return;
+            this.style.opacity = '1';
+        }
+
+        // Event handler for drag over
+        function handleDragOver(e) {
+            if (isProcessing) return;
+            e.preventDefault();
+        }
+
+        // Event handler for drop
+        function handleDrop(e) {
+            if (isProcessing) return;
+            e.preventDefault();
+            if (draggedElement) {
+                this.textContent = draggedElement.textContent;
+                this.dataset.value = draggedElement.dataset.value;
+                checkAnswer();
+            }
+        }
+
+        // Array of encouraging messages for incorrect answers
+        const encouragingMessages = [
+            "Keep trying! You're learning with each attempt!",
+            "You've got this! Try another strategy.",
+            "Don't give up - math takes practice!",
+            "Getting closer! Give it another try.",
+            "Making mistakes helps our brain grow!",
+            "Take your time and try again!",
+            "You can do this - keep going!",
+            "Every attempt makes you stronger!",
+            "Math champions never give up!",
+            "Think carefully and try once more!"
+        ];
+
+        // Function to check the user's answer and provide feedback
+        function checkAnswer() {
+            if (isProcessing) return;
+            isProcessing = true;
+            
+            const userAnswer = parseInt(document.getElementById('answer-box').dataset.value);
+            const feedback = document.getElementById('feedback');
+            const continueButton = document.getElementById('continue-button');
+            const equationBox = document.querySelector('.equation-box');
+            const correctSound = document.getElementById('correct-sound');
+            const incorrectSound = document.getElementById('incorrect-sound');
+
+            if (continueButton.style.display === 'block') {
+                isProcessing = false;
+                return;
+            }
+
+            try {
+                totalAttempts++;
+                totalNumberAnswered++;
+                questionCount++;
+                if (userAnswer === currentAnswer) {
+                    correctSound.play();
+                    feedback.textContent = `Correct! You earned ${getPoints()} points!`;
+                    feedback.classList.add('correct');
+                    equationBox.classList.add('correct');
+
+                    score += getPoints();
+                    document.getElementById('score').textContent = score;
+
+                    setPoints(10);
+                    correctlyAnswered++;
+                    correctAttempts++;
+                } else {
+                    incorrectSound.play();
+                    feedback.textContent = `The correct answer is ${currentAnswer}. Try again!`;
+                    feedback.classList.add('incorrect');
+                    equationBox.classList.add('incorrect');
+
+                    let currentPoints = getPoints();
+                    setPoints(Math.max(0, currentPoints - 1));
+                }
+
+                // Display the continue button after any answer
+                continueButton.style.display = 'block';
+                continueButton.classList.add('visible');
+                continueButton.onclick = continueGame;
+
+                updateMetricsDisplay();
+
+                if (document.getElementById('questions-remaining')) {
+                    document.getElementById('questions-remaining').textContent = TOTAL_QUESTIONS - questionCount;
+                }
+
+                if (questionCount >= TOTAL_QUESTIONS) {
+                    continueButton.onclick = showFinalResults;
+                }
+            } catch (error) {
+                console.error('Error in checkAnswer:', error);
+            } finally {
+                isProcessing = false;
+            }
+        }
+
+        // Function to continue the game to the next question
+        function continueGame() {
+            if (isProcessing) return;
+            isProcessing = true;
+            
+            try {
+                if (questionCount >= TOTAL_QUESTIONS) {
+                    showFinalResults();
+                    return;
+                }
+
+                clearGameState();
+                generateNewEquation();
+            } catch (error) {
+                console.error('Error in continueGame:', error);
+            } finally {
+                isProcessing = false;
+            }
+        }
+
+        // Function to clear the current game state for the next question
+        function clearGameState() {
+            const choices = document.querySelectorAll('.number-choice');
+            choices.forEach(choice => {
+                choice.style.backgroundColor = '';
+                choice.style.border = '';
+            });
+            
+            const equationBox = document.querySelector('.equation-box');
+            if (equationBox) {
+                equationBox.classList.remove('correct', 'incorrect');
+            }
+
+            const feedback = document.getElementById('feedback');
+            if (feedback) {
+                feedback.textContent = '';
+                feedback.className = 'feedback';
+            }
+
+            const continueButton = document.getElementById('continue-button');
+            if (continueButton) {
+                continueButton.style.display = 'none';
+                continueButton.classList.remove('visible');
+            }
+        }
+
+        // Function to restart the game by resetting variables and UI elements
+        function restartGame() {
+            if (isProcessing) return;
+            isProcessing = true;
+            
+            try {
+                questionCount = 0;
+                score = 0;
+                points = 10;
+                draggedElement = null;
+                
+                const scoreDisplay = document.querySelector('.score-display');
+                if (scoreDisplay) {
+                    scoreDisplay.innerHTML = `
+                        Score: <span id="score">0</span><br>
+                        Points Available: <span id="points-available">10</span><br>
+                        Remaining Questions: <span id="questions-remaining">5</span>
+                    `;
+                }
+                
+                const results = document.querySelector('.final-results');
+                if (results) {
+                    results.remove();
+                }
+                
+                const equationBox = document.querySelector('.equation-box');
+                const feedback = document.getElementById('feedback');
+                const continueButton = document.getElementById('continue-button');
+
+                if (equationBox) {
+                    equationBox.style.display = 'flex';
+                    equationBox.classList.remove('correct', 'incorrect');
+                }
+                if (feedback) {
+                    feedback.style.display = 'block';
+                    feedback.textContent = '';
+                    feedback.classList.remove('correct', 'incorrect');
+                }
+                if (continueButton) {
+                    continueButton.style.display = 'none';
+                    continueButton.classList.remove('visible');
+                }
+
+                const answerBox = document.getElementById('answer-box');
+                if (answerBox) {
+                    answerBox.textContent = '';
+                    answerBox.dataset.value = '';
+                }
+
+                const numberChoices = document.getElementById('number-choices');
+                if (numberChoices) {
+                    numberChoices.style.display = 'grid';
+                }
+                
+                generateNewEquation();
+            } catch (error) {
+                console.error('Error in restartGame:', error);
+            } finally {
+                isProcessing = false;
+            }
+        }
+
+        // Function to initialize the game with default values
+        function initializeGame() {
+            points = 10;
+            score = 0;
+            totalAttempts = 0;
+            correctAttempts = 0;
+            totalNumberAnswered = 0;
+            totalTimeSpent = 0;
+            correctlyAnswered = 0;
+
+            document.getElementById('points-available').textContent = points;
+            document.getElementById('score').textContent = score;
+            document.getElementById('correctly-answered').textContent = correctlyAnswered;
+            document.getElementById('total-time-spent').textContent = totalTimeSpent.toFixed(2);
+            document.getElementById('accuracy').textContent = calculateAccuracy().toFixed(2);
+            document.getElementById('total-number-answered').textContent = totalNumberAnswered;
+
+            document.getElementById('equation').textContent = 'Pick a number and drop it here\n!';
+            generateNewEquation();
+        }
+
+        // Event listener to initialize the game and update metrics on page load
+        window.addEventListener('load', function() {
+            initializeGame();
+            updateMetricsDisplay();
+        });
+
+        // Function to show the final results of the game
+        function showFinalResults() {
+            const resultsDiv = document.createElement('div');
+            resultsDiv.className = 'final-results';
+            resultsDiv.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, #ffe6e6, #e6f7e6);
+                border: 2px solid rgba(46, 125, 50, 0.5);
+                border-radius: 15px;
+                box-shadow: 0 0 20px rgba(0,0,0,0.2);
+                text-align: center;
+                z-index: 1000;
+                width: 80%;
+                max-width: 500px;
+                padding: 30px;
+            `;
+
+            const numberChoices = document.getElementById('number-choices');
+            if (numberChoices) {
+                numberChoices.style.display = 'none';
+            }
+
+            const hintButton = document.getElementById('hint-button');
+            if (hintButton) {
+                hintButton.style.display = 'none';
+            }
+
+            const percentage = (score / 50) * 100;
+            let message;
+            if (score === 50) {
+                message = "Perfect score, sprout! You're a math superstar! 🌟";
+            } else if (score >= 40) {
+                message = "Amazing job, sprout! You're really good at math! 🏆";
+            } else if (score >= 30) {
+                message = "Great effort, sprout! Keep practicing and you'll be a champion! 💪";
+            } else {
+                message = "Good try, sprout! Every time you practice, you get better! 🌱";
+            }
+
+            resultsDiv.innerHTML = `
+                <h2 style="color: #4CAF50; margin-bottom: 20px; font-size: 28px;">Game Complete!</h2>
+                <p style="font-size: 24px; margin-bottom: 15px;">Your Score: ${score} out of 50</p>
+                <p style="font-size: 20px; margin-bottom: 25px;">${message}</p>
+                <button onclick="restartGame()" style="
+                    padding: 15px 30px;
+                    font-size: 20px;
+                    background-color: #2e7d32;
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                ">Play Again</button>
+            `;
+
+            const equationBox = document.querySelector('.equation-box');
+            const feedback = document.getElementById('feedback');
+            const continueButton = document.getElementById('continue-button');
+
+            if (equationBox) equationBox.style.display = 'none';
+            if (feedback) feedback.style.display = 'none';
+            if (continueButton) continueButton.style.display = 'none';
+
+            document.body.appendChild(resultsDiv);
+        }
+
+        // Function to show hints for drag and drop
+        function showHints() {
+            const dragHint = document.getElementById('drag-hint');
+            const dropHint = document.getElementById('drop-hint');
+
+            if (dragHint) dragHint.classList.add('visible');
+            if (dropHint) dropHint.classList.add('visible');
+
+            setTimeout(() => {
+                if (dragHint) dragHint.classList.remove('visible');
+                if (dropHint) dropHint.classList.remove('visible');
+            }, 5000);
+        }
+
+        // Event listener to show hints on page load
+        window.addEventListener('load', showHints);
+
+        // Array of math hints for the hint button
+        const mathHints = [
+            "Remember, addition is like counting forward.",
+            "Try using your fingers to count.",
+            "Think of addition as putting two groups together.",
+            "If you're stuck, try drawing a picture.",
+            "Use objects around you to help count.",
+            "Addition is like adding more to a group.",
+            "Try breaking the numbers into smaller parts.",
+            "Remember, practice makes perfect!",
+            "Use a number line to help you add.",
+            "Think of addition as finding the total.",
+        ];
+
+        // Event listener for hint button to display a random hint
+        document.getElementById('hint-button').addEventListener('click', function() {
+            const hintButton = this;
+            const randomHint = mathHints[Math.floor(Math.random() * mathHints.length)];
+            const hintDisplay = document.getElementById('hint-display');
+            hintDisplay.textContent = randomHint;
+            hintButton.disabled = true;
+
+            setTimeout(() => {
+                hintDisplay.textContent = '';
+                hintButton.disabled = false;
+            }, 5000);
+        });
+
+        // Event listener for mute button to toggle sound
+        document.querySelector('.control-button[aria-label="Mute"]').addEventListener('click', function() {
+            const correctSound = document.getElementById('correct-sound');
+            const incorrectSound = document.getElementById('incorrect-sound');
+            const isMuted = correctSound.muted;
+
+            correctSound.muted = !isMuted;
+            incorrectSound.muted = !isMuted;
+
+            if (correctSound.muted) {
+                this.style.background = 'repeating-linear-gradient(45deg, #ffe6e6, #ffe6e6 10px, #e6f7e6 10px, #e6f7e6 20px)';
+            } else {
+                this.style.background = 'rgba(46, 125, 50, 0.2)';
+            }
+
+            if (correctSound.muted) {
+                this.style.border = '2px solid rgba(46, 125, 50, 0.5)';
+            } else {
+                this.style.border = 'none';
+            }
+        });
+
+        // Event listener to maximize the window on page load
+        window.addEventListener('load', function() {
+            window.moveTo(0, 0);
+            window.resizeTo(screen.width, screen.height);
+        });
+
+        // Function to calculate accuracy based on attempts
+        function calculateAccuracy() {
+            return totalAttempts > 0 ? (correctAttempts / totalAttempts) * 100 : 0;
+        }
+
+        // Function to update the metrics display with current game stats
+        function updateMetricsDisplay() {
+            document.getElementById('correctly-answered').textContent = correctlyAnswered;
+            document.getElementById('total-number-answered').textContent = totalNumberAnswered;
+            document.getElementById('accuracy').textContent = calculateAccuracy().toFixed(2);
+            document.getElementById('total-time-spent').textContent = totalTimeSpent.toFixed(2);
+        }
+    </script>
+</body>
+</html>
+            

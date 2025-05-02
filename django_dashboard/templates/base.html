@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MathSprout Analytics{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pink-light: #FFE6E6;
+            --green-light: #E6FFE6;
+            --primary-green: #4A6741;
+            --accent-green: #4CAF50;
+            --border-color: #D1E7DD;
+            --text-color: #333333;
+            --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 8px 15px rgba(0, 0, 0, 0.2);
+            --shadow-intense: 0 12px 28px rgba(0, 0, 0, 0.25);
+            --transition-speed: 0.3s;
+        }
+
+        body {
+            font-family: 'Playfair Display', serif;
+            margin: 0;
+            padding: 0;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--pink-light),
+                var(--pink-light) 40px,
+                var(--green-light) 40px,
+                var(--green-light) 80px
+            );
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .mathsprout-title {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary-green);
+            font-size: 72px;
+            margin: 0 auto 2.5rem auto;
+            text-shadow: var(--shadow-intense);
+            font-weight: bold;
+            line-height: 1.2;
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(255, 230, 230, 0.5), rgba(230, 255, 230, 0.5));
+            border-radius: 35px;
+            border: 2px solid rgba(46, 125, 50, 0.3);
+            box-shadow: var(--shadow-intense),
+                       inset 0 2px 4px rgba(255, 255, 255, 0.5);
+            max-width: 100%;
+            box-sizing: border-box;
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        .mathsprout-title:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3),
+                       inset 0 2px 4px rgba(255, 255, 255, 0.5);
+        }
+
+        .content-section {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 35px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-medium);
+            border: 2px solid rgba(46, 125, 50, 0.2);
+        }
+
+        h1, h2, h3 {
+            color: var(--text-color);
+            font-family: 'Playfair Display', serif;
+            font-weight: bold;
+            text-shadow: var(--shadow-intense);
+            line-height: 1.2;
+            text-align: center;
+            padding: 1.5rem;
+            margin: 1rem 0 2rem 0;
+            background: linear-gradient(135deg, rgba(255, 230, 230, 0.3), rgba(230, 255, 230, 0.3));
+            border-radius: 25px;
+            border: 2px solid rgba(46, 125, 50, 0.2);
+            box-shadow: var(--shadow-medium),
+                       inset 0 2px 4px rgba(255, 255, 255, 0.5);
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 1.25rem;
+            border-radius: 35px;
+            box-shadow: var(--shadow-medium);
+            border: 2px solid rgba(46, 125, 50, 0.2);
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+            text-align: center;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-intense);
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            color: var(--primary-green);
+            font-weight: bold;
+        }
+
+        .metric-label {
+            font-size: 1rem;
+            color: var(--text-color);
+            margin-top: 0.5rem;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 35px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-medium);
+            border: 2px solid rgba(46, 125, 50, 0.2);
+        }
+
+        .navigation {
+            background: linear-gradient(135deg, rgba(255, 230, 230, 0.3), rgba(230, 255, 230, 0.3));
+            padding: 1rem;
+            border-radius: 25px;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-medium);
+            border: 2px solid rgba(46, 125, 50, 0.2);
+        }
+
+        .nav-link {
+            display: block;
+            padding: 1rem;
+            color: var(--text-color);
+            text-decoration: none;
+            border-radius: 20px;
+            transition: all var(--transition-speed);
+            margin: 0.5rem 0;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.8);
+            transform: translateX(5px);
+        }
+
+        .nav-link.active {
+            background: var(--primary-green);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .mathsprout-title {
+                font-size: 48px;
+                padding: 1rem;
+            }
+            
+            .content-section {
+                padding: 1rem;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="container">
+        <div class="mathsprout-title">
+            <span style="color: #333333;">Math</span><span style="color: #4A6741;">Sprout</span> 🌱
+        </div>
+        
+        <div class="navigation">
+            <a href="{% url 'dashboard' %}" class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}">Dashboard</a>
+            <a href="{% url 'leaderboard' %}" class="nav-link {% if request.path == '/leaderboard/' %}active{% endif %}">Leaderboard</a>
+            <a href="{% url 'classroom' %}" class="nav-link {% if request.path == '/classroom/' %}active{% endif %}">Classroom Overview</a>
+            <a href="{% url 'student' %}" class="nav-link {% if request.path == '/student/' %}active{% endif %}">Student Analytics</a>
+            <a href="{% url 'trends' %}" class="nav-link {% if request.path == '/trends/' %}active{% endif %}">Performance Trends</a>
+        </div>
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

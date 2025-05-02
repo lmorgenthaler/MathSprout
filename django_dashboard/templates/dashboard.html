@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}MathSprout Analytics Dashboard{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <h1>🌱 MathSprout Analytics Dashboard</h1>
+    
+    <div class="row">
+        <div class="col-md-3">
+            <div class="metric-card">
+                <div class="metric-value">{{ metrics.total_students }}</div>
+                <div class="metric-label">Total Students</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="metric-card">
+                <div class="metric-value">{{ metrics.total_classes }}</div>
+                <div class="metric-label">Total Classes</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="metric-card">
+                <div class="metric-value">{{ metrics.avg_score }}%</div>
+                <div class="metric-label">Average Score</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="metric-card">
+                <div class="metric-value">{{ metrics.engagement_rate }}%</div>
+                <div class="metric-label">Engagement Rate</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <h2>Performance Overview</h2>
+        <div id="performance-chart"></div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h2>Skill Distribution</h2>
+                <div id="skill-distribution-chart"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h2>Learning Progress</h2>
+                <div id="learning-progress-chart"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-section">
+        <h2>Classrooms & Students</h2>
+        {% for classroom in classrooms %}
+            <div class="chart-container">
+                <h3>{{ classroom.class_name }}</h3>
+                <ul>
+                    {% for student in classroom.student_set.all %}
+                        <li>{{ student.name }} ({{ student.email }})</li>
+                    {% empty %}
+                        <li>No students in this classroom.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Performance Chart
+    var performanceData = {{ performance_data|safe }};
+    var performanceLayout = {
+        title: 'Performance Trend',
+        xaxis: { title: 'Date' },
+        yaxis: { title: 'Score' },
+        showlegend: true
+    };
+    Plotly.newPlot('performance-chart', performanceData, performanceLayout);
+
+    // Skill Distribution Chart
+    var skillData = {{ skill_data|safe }};
+    var skillLayout = {
+        title: 'Skill Distribution',
+        showlegend: true
+    };
+    Plotly.newPlot('skill-distribution-chart', skillData, skillLayout);
+
+    // Learning Progress Chart
+    var progressData = {{ progress_data|safe }};
+    var progressLayout = {
+        title: 'Learning Progress',
+        xaxis: { title: 'Time' },
+        yaxis: { title: 'Progress' },
+        showlegend: true
+    };
+    Plotly.newPlot('learning-progress-chart', progressData, progressLayout);
+</script>
+{% endblock %}
