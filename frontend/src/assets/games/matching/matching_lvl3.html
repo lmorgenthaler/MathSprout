@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pattern Matching Level 3</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Add Supabase client -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <!-- Add game stats collector -->
+    <script src="../functions/game_stats.js"></script>
+    <style>
+        /* Basic styling for the body with a repeating linear gradient background and font settings */
+        body {
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background: repeating-linear-gradient(
+                90deg,
+                #f3e5f5,
+                #f3e5f5 60px,
+                #e1bee7 60px,
+                #e1bee7 120px
+            );
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Styling for the MathSprout logo with positioning and color */
+        .mathsprout-logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #9575cd;
+            font-size: 56px;
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            z-index: 2;
+        }
+
+        /* Title section styling with center alignment and text shadow */
+        .title-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Main title styling with large font size and shadow */
+        .main-title {
+            font-size: 56px;
+            line-height: 0.75;
+            margin: 0;
+            margin-bottom: 12px;
+            font-weight: normal;
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Classroom title styling with medium font size and shadow */
+        .classroom-title {
+            font-size: 28px;
+            margin-top: 18px;
+            margin-left: 0;
+            font-weight: normal;
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Game area styling with flexbox layout for center alignment */
+        .game-area {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 80px;
+            margin: 0 auto;
+            padding: 0;
+            max-width: 800px;
+        }
+
+        /* Number column styling for grid layout of number choices */
+        .number-column {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: repeat(5, auto);
+            grid-gap: 5px;
+            justify-items: center;
+            max-width: 150px;
+            margin-right: 0px;
+            margin-left: -20px;
+        }
+
+        /* Styling for individual number choices with hover effects */
+        .number-choice {
+            grid-column: 1;
+            width: 120px;
+            height: 90px;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(149, 117, 205, 0.5);
+            border-radius: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            cursor: grab;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            color: #444;
+            position: relative;
+            user-select: none;
+            margin: 0;
+        }
+
+        /* Hover effect for number choices to scale and add shadow */
+        .number-choice:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Equation box styling with flexbox layout and gradient background */
+        .equation-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(149, 117, 205, 0.5);
+            border-radius: 40px;
+            padding: 25px 50px;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            position: relative;
+            color: #333;
+            flex-grow: 1;
+            max-width: 600px;
+            margin-left: 0px;
+            text-align: center;
+        }
+
+        /* Answer box styling with dashed border and transition effects */
+        .answer-box {
+            width: 120px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            border: 2px dashed rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            font-size: 48px;
+            text-align: center;
+        }
+
+        /* Score display styling with absolute positioning and blur effect */
+        .score-display {
+            position: absolute;
+            top: 120px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-size: 24px;
+            color: #333;
+            text-align: right;
+            z-index: 1;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Points display styling with smaller font size and shadow */
+        .points-display {
+            margin-top: 10px;
+            font-size: 20px;
+            color: #666;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Continue button styling with gradient background and shadow */
+        .continue-button {
+            margin-top: 8px;
+            padding: 10px 20px;
+            font-size: 20px;
+            background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+            color: #333;
+            border: 2px solid rgba(149, 117, 205, 0.5);
+            border-radius: 25px;
+            cursor: pointer;
+            display: none;  /* Hide by default */
+            opacity: 1;     /* Ensure full opacity when shown */
+            transition: all 0.3s ease;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Hover effect for continue button to change background */
+        .continue-button:hover {
+            background: rgba(149, 117, 205, 0.3);
+        }
+
+        /* Visibility class for continue button */
+        .continue-button.visible {
+            display: block;
+        }
+
+        /* Feedback styling with text shadow and color */
+        .feedback {
+            font-size: 22px;
+            margin-top: 8px;
+            position: relative;
+            bottom: 0;
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Plant icon styling with animation */
+        .plant-icon {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 80px;
+            animation: sway 2s infinite alternate ease-in-out;
+        }
+
+        /* Keyframes for plant icon sway animation */
+        @keyframes sway {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(5deg); }
+        }
+
+        /* Keyframes for correct answer shake animation */
+        @keyframes correctShake {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Keyframes for incorrect answer shake animation */
+        @keyframes incorrectShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* Correct answer styling with light blue background and animation */
+        .equation-box.correct {
+            background: rgba(149, 117, 205, 0.2);  /* Light blue */
+            border-color: rgba(149, 117, 205, 0.5);
+            animation: correctShake 0.5s ease;
+        }
+
+        /* Incorrect answer styling with light red background and animation */
+        .equation-box.incorrect {
+            background: rgba(244, 67, 54, 0.2);  /* Light red */
+            border-color: rgba(244, 67, 54, 0.5);
+            animation: incorrectShake 0.5s ease;
+        }
+
+        /* Feedback styling for correct answers with blue color */
+        .feedback.correct {
+            color: #9575cd;  /* Blue */
+            font-weight: bold;
+        }
+
+        /* Feedback styling for incorrect answers with red color */
+        .feedback.incorrect {
+            color: #F44336;  /* Red */
+            font-weight: bold;
+        }
+
+        /* Glow effect for correct number choice */
+        .number-choice.correct {
+            box-shadow: 0 0 15px rgba(149, 117, 205, 0.5);
+            border-color: rgba(149, 117, 205, 0.8);
+            background: rgba(149, 117, 205, 0.1);
+        }
+
+        /* Text shadow styling for various elements */
+        body, .mathsprout-logo, .main-title, .classroom-title, .score-display, .points-display, .feedback, .continue-button {
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Keyframes for wiggle grow animation */
+        @keyframes wiggleGrow {
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.2) rotate(-5deg); }
+            75% { transform: scale(1.2) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .animate-element {
+            animation: wiggleGrow 1s ease-in-out;
+        }
+
+        /* Initially hide elements that will be animated */
+        .hide-element {
+            opacity: 0;
+        }
+
+        /* Prevent interaction during animation */
+        .disable-interaction {
+            pointer-events: none;
+            user-select: none;
+        }
+
+        /* Wiggle grow animation class */
+        .wiggle-grow {
+            animation: wiggleGrow 1s ease-in-out 2; /* Run animation twice */
+        }
+
+        /* Drag and drop hint styling with shadow and transition */
+        .drag-hint, .drop-hint {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            font-size: 18px;
+            color: #333;
+            z-index: 10;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        /* Visibility class for drag and drop hints */
+        .drag-hint.visible, .drop-hint.visible {
+            opacity: 1;
+        }
+
+        /* Prompt text styling with smaller font size and nowrap */
+        .prompt-text {
+            font-size: 24px; /* Smaller font size for prompt */
+            white-space: nowrap; /* Prevent line breaks */
+        }
+
+        /* Equation text styling with large font size */
+        .equation-text {
+            font-size: 64px; /* Keep the equation font size */
+        }
+
+        /* Green text styling */
+        .green-text {
+            color: green;
+        }
+
+        /* Hint button styling with background color and shadow */
+        .hint-button {
+            display: none;
+        }
+
+        /* Hint display styling with text shadow and color */
+        .hint-display {
+            display: none;
+        }
+
+        /* Control panel styling with flexbox layout and gradient background */
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            position: fixed;
+            top: 50%;
+            left: 20px;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            height: 500px;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid rgba(149, 117, 205, 0.5);
+        }
+
+        /* Control button styling with reduced padding and font size */
+        .control-button {
+            margin: 2px 0;
+            padding: 5.625px 11.25px;
+            font-size: 22.5px;
+            position: relative;
+            border: none;
+            border-radius: 4px;
+            background-color: rgba(149, 117, 205, 0.2);
+            color: #333;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        /* Tooltip styling for control button hover state */
+        .control-button:hover::after {
+            content: attr(aria-label);
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+
+        /* Ensure all metrics are visible and have a smaller font size */
+        .score-display div {
+            margin-bottom: 0;
+            display: block;
+            font-size: 16px;
+        }
+
+        .control-button[aria-label="Mute"] {
+            background-image: none;
+        }
+
+        .control-button[aria-label="Mute"].muted {
+            background: repeating-linear-gradient(45deg, #f3e5f5, #f3e5f5 10px, #e1bee7 10px, #e1bee7 20px);
+            border: 2px solid rgba(149, 117, 205, 0.5);
+        }
+
+        /* Add styling for underlined digits */
+        .digit {
+            text-decoration: underline;
+            text-underline-offset: 18px;
+            margin: 0 5px;
+            font-size: 68px;
+            color: #333;
+            padding-bottom: 18px;
+            display: inline-block;
+            line-height: 1.2;
+        }
+
+        .place-value-container {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            margin-top: 12px;
+        }
+
+        .place-value-row {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .place-value-label {
+            font-size: 20px;
+            color: #333;
+            text-align: center;
+            margin-bottom: 4px;
+        }
+
+        .place-value-input {
+            width: 70px;
+            height: 70px;
+            font-size: 32px;
+            text-align: center;
+            border: 2px solid rgba(149, 117, 205, 0.5);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .place-value-input:focus {
+            outline: none;
+            border-color: #9575cd;
+            box-shadow: 0 0 5px rgba(149, 117, 205, 0.3);
+        }
+
+        /* Add place value visualization styles after the place-value-input:focus style */
+        .place-value-hint {
+            margin-top: 10px;
+            padding: 10px;
+        }
+
+        .place-value-boxes {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .place-box {
+            width: 80px;
+            height: 80px;
+            border: 2px solid rgba(149, 117, 205, 0.5);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            position: relative;
+        }
+
+        .place-box-label {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .place-box-value {
+            font-size: 36px;
+            color: #9575cd;
+            font-weight: bold;
+        }
+
+        .place-box-explanation {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        /* Add styling for the instruction prompt */
+        .instruction-prompt {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 12px;
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            padding: 8px 20px;
+            font-weight: 500;
+        }
+
+        .instruction-prompt .highlight {
+            color: #9575cd;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <!-- MathSprout logo with aria-label for accessibility -->
+    <div class="mathsprout-logo" aria-label="MathSprout Logo">MathSprout 🌱</div>
+
+    <!-- Score display section with live updates for accessibility -->
+    <div class="score-display" aria-live="polite">
+        <span>Score: <span id="score">0</span></span><br>
+        <div class="points-display">Points Available: <span id="points-available">10</span></div><br>
+        <div>Remaining Questions: <span id="questions-remaining">25</span></div><br>
+        <div>Correctly Answered: <span id="correctly-answered">0</span></div><br>
+        <div>Total Number Answered: <span id="total-number-answered">0</span></div><br>
+        <div>Accuracy: <span id="accuracy">0.00</span>%</div><br>
+        <div>Total Time Spent: <span id="total-time-spent">0.00</span> seconds</div>
+    </div>
+
+    <!-- Title section with main and classroom titles -->
+    <div class="title-section">
+        <h1 class="main-title">Pattern Matching<br>Level 3</h1>
+        <h2 class="classroom-title">Mrs. Kathryn Lenth's First Grade Classroom:<br>[Student Name]'s Homework</h2>
+    </div>
+
+    <!-- Game area with number choices and equation box -->
+    <div class="game-area" role="region" aria-label="Game Area">
+        <div class="number-column" id="answer-choices" role="region" aria-label="Number Choices"></div>
+        <div class="equation-box" role="region" aria-label="Equation Box">
+            <div class="instruction-prompt">
+                Complete the pattern by dragging the correct numbers to the empty spaces
+            </div>
+            <div id="pattern-equation" class="equation-text" aria-live="assertive"></div>
+            <div class="answer-boxes">
+                <div class="answer-box" id="blank1" role="region" aria-label="First Blank"></div>
+                <div class="answer-box" id="blank2" role="region" aria-label="Second Blank"></div>
+            </div>
+            <div class="feedback" id="feedback" aria-live="polite"></div>
+            <button id="continue-button" class="continue-button" tabindex="0">Continue</button>
+        </div>
+    </div>
+
+    <!-- Plant icon with animation for visual effect -->
+    <div class="plant-icon" role="img" aria-label="Plant Icon">🪴</div>
+
+    <!-- Control panel with navigation buttons -->
+    <div class="control-panel">
+        <button class="control-button" aria-label="Home">
+            <img src="home_11869504.png" alt="Home Icon" style="width: 24px; height: 24px;">
+        </button>
+        <button class="control-button" aria-label="Settings">
+            <img src="gear_.png" alt="Settings Icon" style="width: 24px; height: 24px;">
+        </button>
+        <button class="control-button" aria-label="Mute">
+            <img src="mute_.png" alt="Mute Icon" style="width: 24px; height: 24px;">
+        </button>
+        <button class="control-button" aria-label="Exit">
+            <img src="exit_.png" alt="Exit Icon" style="width: 24px; height: 24px;">
+        </button>
+    </div>
+
+    <!-- Audio elements for correct and incorrect answer sounds -->
+    <audio id="correct-sound" src="__correct.wav" preload="auto"></audio>
+    <audio id="incorrect-sound" src="__wrong-answer-incorrect-error.wav" preload="auto"></audio>
+    <script>
+        let points = 10;
+        let score = 0;
+        let questionCount = 0;
+        let isProcessing = false;
+        const TOTAL_QUESTIONS = 25;
+        let correctlyAnswered = 0;
+        let totalTimeSpent = 0;
+        let totalAttempts = 0;
+        let correctAttempts = 0;
+        let totalNumberAnswered = 0;
+        let currentPattern = [];
+        let currentAnswers = [];
+        let currentDistractors = [];
+        let startTime = null;
+        let timerInterval = null;
+        let timer = null;
+        let timeLeft = 30;
+        let isMuted = false;
+
+        // Initialize audio elements
+        const correctSound = document.getElementById('correct-sound');
+        const incorrectSound = document.getElementById('incorrect-sound');
+
+        // Function to toggle mute state
+        function toggleMute() {
+            isMuted = !isMuted;
+            const muteButton = document.querySelector('.control-button[aria-label="Mute"]');
+            if (muteButton) {
+                muteButton.classList.toggle('muted', isMuted);
+            }
+        }
+
+        // Function to play sound with mute check
+        function playSound(sound) {
+            if (!isMuted && sound) {
+                sound.play().catch(() => {});
+            }
+        }
+
+        // Add mute button event listener
+        document.addEventListener('DOMContentLoaded', function() {
+            const muteButton = document.querySelector('.control-button[aria-label="Mute"]');
+            if (muteButton) {
+                muteButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    toggleMute();
+                });
+            }
+        });
+
+        if (!localStorage.getItem('gamePoints')) {
+            localStorage.setItem('gamePoints', '10');
+        }
+
+        function getPoints() {
+            return parseInt(localStorage.getItem('gamePoints'));
+        }
+
+        function setPoints(value) {
+            localStorage.setItem('gamePoints', value.toString());
+            document.getElementById('points-available').textContent = value;
+        }
+
+        function startTimer() {
+            if (timer) {
+                clearInterval(timer);
+            }
+
+            const timerElement = document.getElementById('timer');
+            if (!timerElement) {
+                const newTimerElement = document.createElement('div');
+                newTimerElement.id = 'timer';
+                newTimerElement.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    right: 20px;
+                    transform: translateY(-50%);
+                    background: rgba(255, 255, 255, 0.2);
+                    backdrop-filter: blur(8px);
+                    padding: 20px 40px;
+                    border-radius: 25px;
+                    font-size: 48px;
+                    color: #9575cd;
+                    text-align: center;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                    border: 2px solid rgba(149, 117, 205, 0.5);
+                `;
+                document.body.appendChild(newTimerElement);
+            }
+
+            timeLeft = 30; // Reset time to 30 seconds
+            const startTime = Date.now();
+
+            timer = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    timer = null;
+                    showFinalResults();
+                } else {
+                    timeLeft--;
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    document.getElementById('timer').textContent = `Time Left: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                }
+            }, 1000);
+
+            return function stopTimer() {
+                clearInterval(timer);
+                timer = null;
+                return (Date.now() - startTime) / 1000;
+            };
+        }
+
+        function generatePattern() {
+            const step = Math.random() < 0.5 ? 2 : 3;
+            const start = step === 2 ? Math.floor(Math.random() * 5) + 1 : Math.floor(Math.random() * 4) + 1;
+            const fullPattern = Array.from({length: 5}, (_, i) => start + i * step);
+            
+            const blankIndices = new Set();
+            while (blankIndices.size < 2) {
+                blankIndices.add(Math.floor(Math.random() * 3) + 1);
+            }
+            
+            currentPattern = fullPattern.map((num, idx) => blankIndices.has(idx) ? null : num);
+            currentAnswers = Array.from(blankIndices).sort((a, b) => a - b).map(idx => fullPattern[idx]);
+            
+            const distractorSet = new Set();
+            while (distractorSet.size < 4) {
+                const candidate = currentAnswers[0] + Math.floor(Math.random() * 7) - 3;
+                if (!fullPattern.includes(candidate) && candidate > 0) distractorSet.add(candidate);
+            }
+            currentDistractors = Array.from(distractorSet);
+        }
+
+        function renderPattern() {
+            const patternElement = document.getElementById('pattern-equation');
+            const pattern = currentPattern.map(num => num === null ? '_' : num).join(' ');
+            patternElement.textContent = pattern;
+        }
+
+        function generateAnswerChoices() {
+            const answerChoices = [...currentAnswers, ...currentDistractors];
+            const shuffledChoices = answerChoices.sort(() => 0.5 - Math.random());
+            const answerContainer = document.getElementById('answer-choices');
+            answerContainer.innerHTML = shuffledChoices.map(num => {
+                const choice = document.createElement('div');
+                choice.className = 'number-choice';
+                choice.textContent = num;
+                choice.dataset.value = num;
+                choice.draggable = true;
+                return choice.outerHTML;
+            }).join('');
+
+            setupDragAndDrop();
+        }
+
+        function setupDragAndDrop() {
+            const numberChoices = document.querySelectorAll('.number-choice');
+            const answerBoxes = document.querySelectorAll('.answer-box');
+            const blanks = ['blank1', 'blank2'];
+
+            numberChoices.forEach(choice => {
+                choice.addEventListener('dragstart', function(e) {
+                    e.dataTransfer.setData('text/plain', this.dataset.value);
+                    this.classList.add('dragging');
+                });
+
+                choice.addEventListener('dragend', function() {
+                    this.classList.remove('dragging');
+                });
+            });
+
+            answerBoxes.forEach((box, index) => {
+                box.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    this.classList.add('drag-over');
+                });
+
+                box.addEventListener('dragleave', function() {
+                    this.classList.remove('drag-over');
+                });
+
+                box.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('drag-over');
+                    const value = e.dataTransfer.getData('text/plain');
+                    this.textContent = value;
+                    this.dataset.value = value;
+                    
+                    // Auto-check answer when both blanks are filled
+                    const allFilled = Array.from(answerBoxes).every(box => box.dataset.value);
+                    if (allFilled) {
+                        // Prevent multiple submissions
+                        if (isProcessing) return;
+                        isProcessing = true;
+
+                        const userAnswers = Array.from(answerBoxes).map(box => parseInt(box.dataset.value));
+                        const isCorrect = JSON.stringify(userAnswers) === JSON.stringify(currentAnswers);
+                        
+                        const feedback = document.getElementById('feedback');
+                        const equationBox = document.querySelector('.equation-box');
+
+                        totalAttempts++;
+                        totalNumberAnswered++;
+                        
+                        feedback.textContent = isCorrect ? 'Correct! You completed the pattern!' : 'Not quite right. Try again!';
+                        feedback.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+                        equationBox.classList.add(isCorrect ? 'correct' : 'incorrect');
+                        
+                        if (isCorrect) {
+                            score += points;
+                            points = 10;
+                            correctlyAnswered++;
+                            correctAttempts++;
+                            document.getElementById('score').textContent = score;
+                            playSound(correctSound);
+                        } else {
+                            points = Math.max(0, points - 1);
+                            playSound(incorrectSound);
+                        }
+                        
+                        document.getElementById('points-available').textContent = points;
+                        updateMetricsDisplay();
+
+                        // Clear the answer boxes after a delay
+                        setTimeout(() => {
+                            answerBoxes.forEach(box => {
+                                box.textContent = '';
+                                box.dataset.value = '';
+                            });
+                            
+                            // Reset feedback and equation box
+                            feedback.textContent = '';
+                            feedback.className = 'feedback';
+                            equationBox.classList.remove('correct', 'incorrect');
+                            
+                            // Move to next question
+                            nextQuestion();
+                            isProcessing = false;
+                        }, 1500);
+                    }
+                });
+            });
+        }
+
+        function nextQuestion() {
+            if (questionCount >= TOTAL_QUESTIONS) {
+                showFinalResults();
+                return;
+            }
+
+            questionCount++;
+            clearGameState();
+            generatePattern();
+            renderPattern();
+            generateAnswerChoices();
+        }
+
+        function showFinalResults() {
+            // Clear any existing timer first
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+
+            // Hide the timer element
+            const timerElement = document.getElementById('timer');
+            if (timerElement) {
+                timerElement.style.display = 'none';
+            }
+            
+            // First, hide all game elements
+            const elementsToHide = [
+                '.equation-box',
+                '#feedback',
+                '#continue-button',
+                '#check-answer',
+                '#hint-button',
+                '.number-column',
+                '#pattern-equation',
+                '#timer'
+            ];
+            
+            elementsToHide.forEach(selector => {
+                const element = document.querySelector(selector);
+                if (element) element.style.display = 'none';
+            });
+
+            // Remove any existing results div
+            const existingResults = document.querySelector('.final-results');
+            if (existingResults) {
+                existingResults.remove();
+            }
+
+            // Create and show the results div
+            const resultsDiv = document.createElement('div');
+            resultsDiv.className = 'final-results';
+            resultsDiv.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+                border: 2px solid rgba(149, 117, 205, 0.5);
+                border-radius: 25px;
+                box-shadow: 0 0 30px rgba(0,0,0,0.3);
+                text-align: center;
+                z-index: 1000;
+                width: 80%;
+                max-width: 500px;
+                padding: 40px;
+                color: #9575cd;
+            `;
+
+            const percentage = (score / 50) * 100;
+            const messages = {
+                100: "Perfect score, sprout! You're a pattern matching superstar! 🌟",
+                80: "Amazing job, sprout! You're really good at finding patterns! 🏆",
+                60: "Great effort, sprout! Keep practicing and you'll be a champion! 💪",
+                0: "Good try, sprout! Every time you practice, you get better! 🌱"
+            };
+            
+            const message = messages[Math.floor(percentage / 20) * 20] || messages[0];
+
+            resultsDiv.innerHTML = `
+                <h2 style="color: #9575cd; margin-bottom: 20px; font-size: 32px;">Game Complete!</h2>
+                <p style="font-size: 28px; margin-bottom: 15px;">Your Total Score: ${score}</p>
+                <p style="font-size: 24px; margin-bottom: 25px;">${message}</p>
+                <button id="play-again" style="
+                    padding: 15px 30px;
+                    font-size: 20px;
+                    background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+                    color: #9575cd;
+                    border: 2px solid rgba(149, 117, 205, 0.5);
+                    border-radius: 25px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    font-family: 'Playfair Display', serif;
+                    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                    letter-spacing: 0.5px;
+                ">Play Again</button>
+            `;
+
+            document.body.appendChild(resultsDiv);
+
+            // Add event listeners for the play again button
+            const playAgainButton = document.getElementById('play-again');
+            if (playAgainButton) {
+                // Create a new button to replace the existing one to prevent event listener conflicts
+                const newPlayAgainButton = playAgainButton.cloneNode(true);
+                playAgainButton.parentNode.replaceChild(newPlayAgainButton, playAgainButton);
+
+                // Add event listeners to the new button
+                newPlayAgainButton.addEventListener('mouseover', function() {
+                    this.style.background = 'rgba(149, 117, 205, 0.3)';
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.15)';
+                });
+                
+                newPlayAgainButton.addEventListener('mouseout', function() {
+                    this.style.background = 'linear-gradient(135deg, #f3e5f5, #e1bee7)';
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+                });
+                
+                newPlayAgainButton.addEventListener('mousedown', function() {
+                    this.style.transform = 'translateY(1px)';
+                    this.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+                });
+                
+                newPlayAgainButton.addEventListener('mouseup', function() {
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.15)';
+                });
+
+                // Click handler
+                newPlayAgainButton.addEventListener('click', function() {
+                    // Remove the results div
+                    resultsDiv.remove();
+                    
+                    // Show all game elements
+                    elementsToHide.forEach(selector => {
+                        const element = document.querySelector(selector);
+                        if (element) element.style.display = '';
+                    });
+                    
+                    // Reset and start a new game
+                    initializeGame();
+                });
+            }
+        }
+
+        function initializeGame() {
+            if (isProcessing) return;
+            isProcessing = true;
+            
+            try {
+                // Reset all game state variables
+                points = 10;
+                score = 0;
+                questionCount = 0;
+                correctlyAnswered = 0;
+                totalNumberAnswered = 0;
+                totalTimeSpent = 0;
+                totalAttempts = 0;
+                correctAttempts = 0;
+                currentPattern = [];
+                currentAnswers = [];
+                currentDistractors = [];
+                startTime = null;
+                timeLeft = 30;
+                
+                // Clear any existing timer
+                if (timer) {
+                    clearInterval(timer);
+                    timer = null;
+                }
+                
+                // Reset localStorage
+                localStorage.setItem('gamePoints', '10');
+                
+                // Reset all UI elements
+                document.getElementById('points-available').textContent = points;
+                document.getElementById('score').textContent = score;
+                document.getElementById('correctly-answered').textContent = correctlyAnswered;
+                document.getElementById('total-time-spent').textContent = '0.00';
+                document.getElementById('accuracy').textContent = '0.00';
+                document.getElementById('total-number-answered').textContent = totalNumberAnswered;
+                document.getElementById('questions-remaining').textContent = TOTAL_QUESTIONS;
+                
+                // Clear any existing game state
+                clearGameState();
+                
+                // Show the timer if it exists
+                const timerElement = document.getElementById('timer');
+                if (timerElement) {
+                    timerElement.style.display = 'block';
+                }
+                
+                // Start fresh timer
+                startTimer();
+                
+                // Generate new pattern and render
+                generatePattern();
+                renderPattern();
+                generateAnswerChoices();
+            } catch (error) {
+                console.error('Error in initializeGame:', error);
+            } finally {
+                isProcessing = false;
+            }
+        }
+
+        function clearGameState() {
+            const equationBox = document.querySelector('.equation-box');
+            if (equationBox) {
+                equationBox.classList.remove('correct', 'incorrect');
+            }
+
+            const feedback = document.getElementById('feedback');
+            if (feedback) {
+                feedback.textContent = '';
+                feedback.className = 'feedback';
+            }
+
+            const continueButton = document.getElementById('continue-button');
+            if (continueButton) {
+                continueButton.style.display = 'none';
+                continueButton.classList.remove('visible');
+            }
+
+            // Clear the answer boxes
+            const answerBoxes = document.querySelectorAll('.answer-box');
+            answerBoxes.forEach(box => {
+                box.textContent = '';
+                box.dataset.value = '';
+            });
+        }
+
+        function calculateAccuracy() {
+            return totalAttempts > 0 ? (correctAttempts / totalAttempts) * 100 : 0;
+        }
+
+        function updateMetricsDisplay() {
+            document.getElementById('correctly-answered').textContent = correctlyAnswered;
+            document.getElementById('total-number-answered').textContent = totalNumberAnswered;
+            document.getElementById('accuracy').textContent = calculateAccuracy().toFixed(2);
+            document.getElementById('total-time-spent').textContent = totalTimeSpent.toFixed(2);
+            document.getElementById('questions-remaining').textContent = TOTAL_QUESTIONS - questionCount;
+            document.getElementById('score').textContent = score;
+        }
+
+        // Remove the DOMContentLoaded event listener since we're using window.load
+        window.addEventListener('load', function() {
+            initializeGame();
+        });
+    </script>
+</body>
+</html>

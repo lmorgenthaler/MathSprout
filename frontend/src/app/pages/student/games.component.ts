@@ -18,9 +18,9 @@ import { CommonModule } from '@angular/common';
             <h3 class="text-xl font-semibold text-gray-800">Addition</h3>
           </div>
           <p class="text-gray-600 mb-4">Practice addition with fun interactive challenges!</p>
-          <div class="h-48 bg-gray-50 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-200">
-            <p class="text-gray-400">Coming Soon</p>
-          </div>
+          <a href="assets/games/addition/adding_lvl1.html" target="_blank">
+            <button class="px-6 py-3 bg-blue-500 text-white font-semibold rounded shadow hover:bg-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400">Play Addition Game</button>
+          </a>
         </div>
 
         <!-- Subtraction Game -->
@@ -32,9 +32,9 @@ import { CommonModule } from '@angular/common';
             <h3 class="text-xl font-semibold text-gray-800">Subtraction</h3>
           </div>
           <p class="text-gray-600 mb-4">Master subtraction through exciting missions!</p>
-          <div class="h-48 bg-gray-50 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-200">
-            <p class="text-gray-400">Coming Soon</p>
-          </div>
+          <a href="assets/games/subtraction/subtraction_lvl2.html" target="_blank" class="block h-48 bg-gray-50 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-200">
+            <button class="px-6 py-3 bg-green-500 text-white font-semibold rounded shadow hover:bg-green-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-400">Play Subtraction Game</button>
+          </a>
         </div>
 
         <!-- Patterns Game -->
@@ -46,9 +46,9 @@ import { CommonModule } from '@angular/common';
             <h3 class="text-xl font-semibold text-gray-800">Patterns</h3>
           </div>
           <p class="text-gray-600 mb-4">Discover and create mathematical patterns!</p>
-          <div class="h-48 bg-gray-50 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-200">
-            <p class="text-gray-400">Coming Soon</p>
-          </div>
+          <a href="assets/games/matching/matching_lvl3.html" target="_blank" class="block h-48 bg-gray-50 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-200">
+            <button class="px-6 py-3 bg-purple-500 text-white font-semibold rounded shadow hover:bg-purple-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-purple-400">Play Patterns Game</button>
+          </a>
         </div>
       </div>
     </div>
