@@ -79,8 +79,9 @@ import { LogoComponent } from '../../shared/components/logo/logo.component';
       <!-- Main Content -->
       <div class="flex-1 overflow-auto bg-[#d4f5d4]">
         <header class="bg-white shadow">
-          <div class="px-4 py-6">
+          <div class="px-4 py-6 flex justify-between items-center">
             <h1 class="text-2xl font-semibold text-gray-800">Welcome, {{ studentName }}</h1>
+            <div class="plant-icon text-4xl" role="img" aria-label="Plant Icon">🪴</div>
           </div>
         </header>
         <main class="p-6">
