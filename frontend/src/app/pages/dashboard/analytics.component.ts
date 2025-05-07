@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SupabaseService } from '../../services/supabase.service';
+import * as Plotly from 'plotly.js-dist-min';
 
 @Component({
   selector: 'app-analytics',
@@ -8,9 +8,9 @@ import { SupabaseService } from '../../services/supabase.service';
   imports: [CommonModule],
   template: `
     <div class="p-6">
-      <h2 class="text-2xl font-bold mb-6">Analytics</h2>
+      <h2 class="text-2xl font-bold mb-6">Classroom Analytics Dashboard</h2>
 
-      <!-- Overview Cards -->
+      <!-- Summary Cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div class="bg-white rounded-lg shadow p-6">
           <h3 class="text-lg font-semibold mb-2">Total Students</h3>
@@ -21,81 +21,65 @@ import { SupabaseService } from '../../services/supabase.service';
           <p class="text-3xl font-bold text-green-600">{{ averageScore }}%</p>
         </div>
         <div class="bg-white rounded-lg shadow p-6">
-          <h3 class="text-lg font-semibold mb-2">Total Time Spent</h3>
-          <p class="text-3xl font-bold text-purple-600">{{ totalTimeSpent }}h</p>
+          <h3 class="text-lg font-semibold mb-2">Engagement Rate</h3>
+          <p class="text-3xl font-bold text-purple-600">{{ engagementRate }}%</p>
         </div>
       </div>
 
-      <!-- Performance by Subject -->
+      <!-- Performance Over Time -->
       <div class="bg-white rounded-lg shadow p-6 mb-6">
-        <h3 class="text-lg font-semibold mb-4">Performance by Subject</h3>
-        <div class="space-y-4">
-          <div>
-            <div class="flex justify-between mb-1">
-              <span class="text-gray-600">Addition</span>
-              <span class="text-gray-600">{{ subjectScores.addition }}%</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2.5">
-              <div class="bg-blue-600 h-2.5 rounded-full" [style.width.%]="subjectScores.addition"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between mb-1">
-              <span class="text-gray-600">Subtraction</span>
-              <span class="text-gray-600">{{ subjectScores.subtraction }}%</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2.5">
-              <div class="bg-green-600 h-2.5 rounded-full" [style.width.%]="subjectScores.subtraction"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between mb-1">
-              <span class="text-gray-600">Multiplication</span>
-              <span class="text-gray-600">{{ subjectScores.multiplication }}%</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2.5">
-              <div class="bg-purple-600 h-2.5 rounded-full" [style.width.%]="subjectScores.multiplication"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between mb-1">
-              <span class="text-gray-600">Division</span>
-              <span class="text-gray-600">{{ subjectScores.division }}%</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2.5">
-              <div class="bg-yellow-600 h-2.5 rounded-full" [style.width.%]="subjectScores.division"></div>
-            </div>
-          </div>
-        </div>
+        <h3 class="text-lg font-semibold mb-4">Performance Over Time</h3>
+        <div id="performanceChart" style="width: 100%; height: 400px;"></div>
       </div>
 
-      <!-- Top Performers -->
+      <!-- Skill Distribution -->
+      <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-4">Skill Distribution</h3>
+        <div id="skillChart" style="width: 100%; height: 400px;"></div>
+      </div>
+
+      <!-- Student Performance Table -->
       <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-semibold mb-4">Top Performers</h3>
+        <h3 class="text-lg font-semibold mb-4">Student Performance by Subject</h3>
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grade Level</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Average Score</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Games Played</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grade</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Addition</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subtraction</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pattern Matching</th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr *ngFor="let student of topPerformers">
+              <tr *ngFor="let student of students">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-gray-900">{{ student.name }}</div>
                   <div class="text-sm text-gray-500">{{ student.email }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">{{ student.grade_level }}</div>
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                    Grade {{ student.grade }}
+                  </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">{{ student.average_score }}%</div>
+                  <div class="text-sm text-gray-900">{{ student.scores.addition }}%</div>
+                  <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                    <div class="bg-blue-600 h-1.5 rounded-full" [style.width.%]="student.scores.addition"></div>
+                  </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">{{ student.games_played }}</div>
+                  <div class="text-sm text-gray-900">{{ student.scores.subtraction }}%</div>
+                  <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                    <div class="bg-green-600 h-1.5 rounded-full" [style.width.%]="student.scores.subtraction"></div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">{{ student.scores.patternMatching }}%</div>
+                  <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                    <div class="bg-purple-600 h-1.5 rounded-full" [style.width.%]="student.scores.patternMatching"></div>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -106,46 +90,160 @@ import { SupabaseService } from '../../services/supabase.service';
   `
 })
 export class AnalyticsComponent implements OnInit {
+  // Summary metrics
   totalStudents = 0;
   averageScore = 0;
-  totalTimeSpent = 0;
-  subjectScores = {
-    addition: 0,
-    subtraction: 0,
-    multiplication: 0,
-    division: 0
-  };
-  topPerformers: any[] = [];
+  engagementRate = 0;
 
-  constructor(private supabaseService: SupabaseService) {}
+  // Student data
+  students: any[] = [];
 
-  async ngOnInit() {
-    // TODO: Implement loading analytics data from Supabase
-    // This is placeholder data for now
-    this.totalStudents = 25;
-    this.averageScore = 85;
-    this.totalTimeSpent = 150;
-    this.subjectScores = {
-      addition: 90,
-      subtraction: 85,
-      multiplication: 80,
-      division: 75
-    };
-    this.topPerformers = [
+  // Plotly chart data
+  performanceOverTime = {
+    data: [
       {
-        name: 'John Doe',
-        email: 'john@example.com',
-        grade_level: '3',
-        average_score: 95,
-        games_played: 50
+        x: [] as string[],
+        y: [] as number[],
+        type: 'scatter' as const,
+        mode: 'lines+markers' as const,
+        name: 'Addition',
+        line: { color: '#3b82f6' }  // Blue
       },
       {
-        name: 'Jane Smith',
-        email: 'jane@example.com',
-        grade_level: '4',
-        average_score: 92,
-        games_played: 45
+        x: [] as string[],
+        y: [] as number[],
+        type: 'scatter' as const,
+        mode: 'lines+markers' as const,
+        name: 'Subtraction',
+        line: { color: '#10b981' }  // Green
+      },
+      {
+        x: [] as string[],
+        y: [] as number[],
+        type: 'scatter' as const,
+        mode: 'lines+markers' as const,
+        name: 'Pattern Matching',
+        line: { color: '#8b5cf6' }  // Purple
+      }
+    ],
+    layout: {
+      title: { text: 'Average Score Over Time' },
+      xaxis: { title: { text: 'Date' } },
+      yaxis: { title: { text: 'Score (%)' }, range: [0, 100] }
+    }
+  };
+
+  skillDistribution = {
+    data: [{
+      x: [] as string[],
+      y: [] as number[],
+      type: 'bar' as const,
+      marker: {
+        color: ['#3b82f6', '#10b981', '#8b5cf6']  // Blue, Green, Purple
+      }
+    }],
+    layout: {
+      title: { text: 'Average Score by Skill' },
+      yaxis: { title: { text: 'Score (%)' }, range: [0, 100] }
+    }
+  };
+
+  constructor() {}
+
+  ngOnInit() {
+    this.loadMockData();
+    this.initializeCharts();
+  }
+
+  private initializeCharts() {
+    Plotly.newPlot('performanceChart', this.performanceOverTime.data, this.performanceOverTime.layout);
+    Plotly.newPlot('skillChart', this.skillDistribution.data, this.skillDistribution.layout);
+  }
+
+  private loadMockData() {
+    // Summary metrics
+    this.totalStudents = 5;
+    this.averageScore = 85;
+    this.engagementRate = 92;
+
+    // Performance over time data
+    const dates = [];
+    const additionScores = [];
+    const subtractionScores = [];
+    const patternScores = [];
+    
+    for (let i = 0; i < 30; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - (29 - i));
+      dates.push(date.toLocaleDateString());
+      additionScores.push(75 + Math.random() * 20);    // Base score around 75-95
+      subtractionScores.push(70 + Math.random() * 25); // Base score around 70-95
+      patternScores.push(65 + Math.random() * 30);     // Base score around 65-95
+    }
+
+    this.performanceOverTime.data[0].x = dates;
+    this.performanceOverTime.data[0].y = additionScores;
+    this.performanceOverTime.data[1].x = dates;
+    this.performanceOverTime.data[1].y = subtractionScores;
+    this.performanceOverTime.data[2].x = dates;
+    this.performanceOverTime.data[2].y = patternScores;
+
+    // Skill distribution data - Updated for three subjects
+    this.skillDistribution.data[0].x = ['Addition', 'Subtraction', 'Pattern Matching'];
+    this.skillDistribution.data[0].y = [90, 85, 78];  // Sample scores
+
+    // Student data with three subjects
+    this.students = [
+      { 
+        name: 'John Doe', 
+        email: 'john@example.com', 
+        grade: 1, 
+        scores: {
+          addition: 95,
+          subtraction: 90,
+          patternMatching: 85
+        }
+      },
+      { 
+        name: 'Jane Smith', 
+        email: 'jane@example.com', 
+        grade: 2, 
+        scores: {
+          addition: 92,
+          subtraction: 88,
+          patternMatching: 90
+        }
+      },
+      { 
+        name: 'Alex Johnson', 
+        email: 'alex@example.com', 
+        grade: 1, 
+        scores: {
+          addition: 88,
+          subtraction: 82,
+          patternMatching: 75
+        }
+      },
+      { 
+        name: 'Emily Brown', 
+        email: 'emily@example.com', 
+        grade: 2, 
+        scores: {
+          addition: 85,
+          subtraction: 90,
+          patternMatching: 80
+        }
+      },
+      { 
+        name: 'Michael Davis', 
+        email: 'michael@example.com', 
+        grade: 2, 
+        scores: {
+          addition: 82,
+          subtraction: 78,
+          patternMatching: 70
+        }
       }
     ];
   }
-} 
+}

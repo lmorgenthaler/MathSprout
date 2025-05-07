@@ -10,7 +10,9 @@
     "@angular/router": "^19.2.0",
     "@supabase/supabase-js": "^2.49.1",
     "@types/node": "^22.13.9",
+    "@types/plotly.js": "^3.0.0",
     "ngx-papaparse": "^8.0.0",
+    "plotly.js-dist-min": "^3.0.1",
     "typescript": "^5.3.3"
   },
   "devDependencies": {

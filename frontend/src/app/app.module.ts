@@ -10,7 +10,6 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
     BrowserModule,
     BrowserAnimationsModule,
     HttpClientModule,
-    AppComponent
   ],
   providers: [
     {
