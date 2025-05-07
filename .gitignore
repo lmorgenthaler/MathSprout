@@ -39,3 +39,4 @@ backend/venv/
 # package-lock.json
 # yarn.lock
 *.pyc
+.vercel

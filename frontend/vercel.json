@@ -1,0 +1,10 @@
+{
+    "rewrites": [
+      { "source": "/(.*)", "destination": "/index.html" }
+    ],
+    "redirects": [],
+    "cleanUrls": true,
+    "buildCommand": "npm install && npm run build",
+    "outputDirectory": "dist/frontend",
+    "framework": "angular"
+  }

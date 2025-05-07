@@ -1,0 +1,27 @@
+# Dependencies
+node_modules
+.angular
+dist
+
+# Development files
+.git
+.vscode
+*.log
+.DS_Store
+.env
+.env.*
+*.local
+
+# Cache directories
+.cache
+.npm
+.yarn
+.pnpm-store
+
+# IDE files
+.idea
+*.swp
+*.swo
+
+# Docker files
+docker/ 
